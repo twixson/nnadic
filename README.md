@@ -6,16 +6,19 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of nnadic (Neural Network for Asymptotic
-Dependence/Independence Classification) is to classify bivariate data
-sets as either asymptotically dependent or independent using a trained
-convolutional neural network. The tool *will be* set up to
-automatically: \* transform the marginal distribution \* take the top 5%
-of the data (using the $l_\infty$-norm) \* resample or subsample as
-necessary to ensure the data is of the correct dimension \* output the
-predicted result from the neural network There *will be* many
-customization options which allow the user to take advantage of advanced
-functionality.
+The goal of nnadic (**N**eural **N**etwork for **A**symptotic
+**D**ependence/**I**ndependence **C**lassification) is to classify
+bivariate data sets as either asymptotically dependent or independent
+using a trained convolutional neural network. The tool *will be* set up
+to automatically:  
+- transform the marginal distribution  
+- take the top 5% of the data (using the $l_\infty$-norm)  
+- resample or subsample as necessary to ensure the data is of the
+correct dimension  
+- output the predicted result from the neural network
+
+There *will be* many customization options which allow the user to take
+advantage of advanced functionality.
 
 ## Installation
 
