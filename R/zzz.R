@@ -69,8 +69,8 @@
 
 
     keras::load_model_weights_hdf5(model,
-                                   "./pretrained_models/CNN_0530_model.hdf5")
-  #   system.file("pretrained_models/CNN_0530_model.hdf5", package = "nnadic"))
-  # assign("model", model, envir = parent.env(environment()))
+        system.file("pretrained_models/CNN_0705_weights.hdf5",
+                    package = "nnadic"))
+    assign("model", model, envir = parent.env(environment()))
 }
 
