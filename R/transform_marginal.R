@@ -49,20 +49,20 @@ get_nnadic_input <- function(data,
   }
   if(dim(data)[2] == 2) {
     if(make_exponential == TRUE){
-      data <- apply(data, 2, transform_to_exponential())
+      data <- apply(data, 2, transform_to_exponential)
     }
-    linfinty <- apply(data, 1, max())
-    if(length(linfinty) > 10000){
+    linfinity <- apply(data, 1, max)
+    if(length(linfinity) > 10000){
       if(subsample == TRUE) {
         cutoff_value <- stats::quantile(linfinity, probs = 0.95)
       }
     } else {
       cutoff_value <- max(stats::quantile(linfinity, probs = 0.95),
-                          sort(linfinty)[500])
+                          sort(linfinity)[500])
     }
-    temp_indices <- which(linfinty > cutoff_value)
+    temp_indices <- which(linfinity > cutoff_value)
     if(dim(data)[1] > 10000 && length(temp_indices) < 500){
-      tie_indices <- which(linfinty == stats::quantile(linfinity, probs = 0.95))
+      tie_indices <- which(linfinity == stats::quantile(linfinity, probs = 0.95))
     }
     indices_mat <- resample_to_500(temp_indices,
                                    tie_indices. = tie_indices,
