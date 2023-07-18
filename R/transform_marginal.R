@@ -113,7 +113,7 @@ transform_to_exponential <- function(data) {
 
 
 resample_to_500 <- function(indices,
-                            tie_indices.,
+                            tie_indices. = NULL,
                             subsample.,
                             num_datasets.,
                             include_all.){

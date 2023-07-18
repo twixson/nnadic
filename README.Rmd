@@ -35,6 +35,13 @@ You can install the development version of nnadic from [GitHub](https://github.c
 devtools::install_github("twixson/nnadic")
 ```
 
+The `nnadic` package requires the `nnadicTestData` package which has 290Mb of data in it. This can take a while to download. Some users have found that the previous installation instructions do not work and instead needed to use:
+
+``` r
+options(timeout = 400)
+devtools::install_github("twixson/nnadic")
+```
+
 ## Example
 
 This is a basic example which shows you how to solve a common problem:
