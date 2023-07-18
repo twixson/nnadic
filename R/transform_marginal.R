@@ -55,10 +55,10 @@ get_nnadic_input <- function(data,
     if(length(linfinity) > 10000){
       if(subsample == TRUE) {
         cutoff_value <- stats::quantile(linfinity, probs = 0.95)
-      }
-    } else {
+      } else {
       cutoff_value <- max(stats::quantile(linfinity, probs = 0.95),
-                          sort(linfinity)[500])
+                          (sort(linfinity)[500]))
+      }
     }
     temp_indices <- which(linfinity > cutoff_value)
     if(dim(data)[1] > 10000 && length(temp_indices) < 500){

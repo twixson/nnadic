@@ -30,48 +30,57 @@ You can install the development version of nnadic from
 devtools::install_github("twixson/nnadic")
 ```
 
-The `nnadic` package requires the `nnadicTestData` package which has
-290Mb of data in it. This can take a while to download. Some users have
-found that the previous installation instructions do not work and
-instead needed to use:
+Troubleshooting:
+
+- The `nnadic` package requires the `nnadicTestData` package which has
+  290Mb of data in it. Some users have found that they need to run
+  `options(timeout = 400)` prior to installation.  
+- The `nnadic` package requires a working `keras` installation. Some
+  users have found that installing `keras` first is helpful.
+
+Suggested install code:
 
 ``` r
+install.packages("devtools")
+install.packages("keras")
+  # this may prompt you to install 'miniconda', follow the prompts
+library(devtools)
+library(keras)
+install_keras()
 options(timeout = 400)
-devtools::install_github("twixson/nnadic")
+install_github("twixson/nnadicTestData")
+install_github("twixson/nnadic")
 ```
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+This is a basic example which shows you the common workflow:
 
 ``` r
 library(nnadic)
-## basic example code
+library(nnadicTestData)
+library(evd)      # for generating AD datasets (logistic)
+library(mvtnorm)  # for generating AI datasets (gaussian)
+
+results <- nnadic(test_data_four)
+mean(results$preds == test_response_four)
+#> [1] 0.9525
+hist(results$probs, freq = F)
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`?
-You can include R chunks like so:
+<img src="man/figures/README-example-1.png" width="100%" />
 
 ``` r
-summary(cars)
-#>      speed           dist       
-#>  Min.   : 4.0   Min.   :  2.00  
-#>  1st Qu.:12.0   1st Qu.: 26.00  
-#>  Median :15.0   Median : 36.00  
-#>  Mean   :15.4   Mean   : 42.98  
-#>  3rd Qu.:19.0   3rd Qu.: 56.00  
-#>  Max.   :25.0   Max.   :120.00
+
+data <- rbvevd(10000, dep = 0.5, model = "log")
+data_ready <- get_nnadic_input(data)
+results <- nnadic(data_ready)
+mean(results$preds) # should be 0
+#> [1] 0
+
+data <- rmvnorm(19834, c(0,0), matrix(c(1, 0.5, 0.5, 1), nrow = 2))
+data_ready <- get_nnadic_input(data, subsample = TRUE)
+results <- nnadic(data_ready)
+mean(results$preds) # should be 1
+#> [1] 1
 ```
-
-You’ll still need to render `README.Rmd` regularly, to keep `README.md`
-up-to-date. `devtools::build_readme()` is handy for this. You could also
-use GitHub Actions to re-render `README.Rmd` every time you push. An
-example workflow can be found here:
-<https://github.com/r-lib/actions/tree/v1/examples>.
-
-You can also embed plots, for example:
-
-<img src="man/figures/README-pressure-1.png" width="100%" />
-
-In that case, don’t forget to commit and push the resulting figure
-files, so they display on GitHub and CRAN.
