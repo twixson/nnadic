@@ -64,7 +64,7 @@ library(evd)      # for generating AD datasets (logistic)
 library(mvtnorm)  # for generating AI datasets (gaussian)
 
 results <- nnadic(test_data_four)
-#> 125/125 - 2s - 2s/epoch - 17ms/step
+#> 125/125 - 1s - 915ms/epoch - 7ms/step
 mean(results$preds == test_response_four)
 #> [1] 0.968
 hist(results$probs, freq = F)
@@ -77,14 +77,14 @@ hist(results$probs, freq = F)
 data <- rbvevd(10000, dep = 0.5, model = "log")
 data_ready <- get_nnadic_input(data)
 results <- nnadic(data_ready)
-#> 4/4 - 0s - 348ms/epoch - 87ms/step
+#> 4/4 - 0s - 212ms/epoch - 53ms/step
 mean(results$preds) # should be 0
 #> [1] 0
 
 data <- rmvnorm(19834, c(0,0), matrix(c(1, 0.5, 0.5, 1), nrow = 2))
 data_ready <- get_nnadic_input(data, subsample = TRUE)
 results <- nnadic(data_ready)
-#> 4/4 - 0s - 37ms/epoch - 9ms/step
+#> 4/4 - 0s - 38ms/epoch - 9ms/step
 mean(results$preds) # should be 1
-#> [1] 0.99
+#> [1] 1
 ```
