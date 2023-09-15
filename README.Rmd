@@ -43,12 +43,12 @@ Troubleshooting:
 Suggested install code: 
 
 ``` r
-install.packages("devtools")
-install.packages("keras")
-  # this may prompt you to install 'miniconda', follow the prompts
-library(devtools)
-library(keras)
-install_keras()
+Install.packages("remotes")
+remotes::install_github("rstudio/tensorflow")
+remotes::install_github("rstudio/keras")
+reticulate::install_miniconda()
+tensorflow::install_tensorflow()
+keras::install_keras()
 options(timeout = 400)
 install_github("twixson/nnadicTestData")
 install_github("twixson/nnadic")

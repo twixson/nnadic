@@ -59,6 +59,9 @@ get_nnadic_input <- function(data,
       cutoff_value <- max(stats::quantile(linfinity, probs = 0.95),
                           (sort(linfinity)[500]))
       }
+    } else {
+      cutoff_value <- max(stats::quantile(linfinity, probs = 0.95),
+                          (sort(linfinity)[500]))
     }
     temp_indices <- which(linfinity > cutoff_value)
     if(dim(data)[1] > 10000 && length(temp_indices) < 500){

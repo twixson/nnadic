@@ -16,8 +16,8 @@
 #' @export
 #'
 #' @examples
-#' predicted_probs <- nnadic(test_data)
-#' get_confusion_matrix(pred_prob = predicted_prob, truth = test_response)
+#' predicted_probs <- nnadic(test_data_four)
+#' get_confusion_matrix(pred_prob = predicted_prob, truth = test_response_four)
 get_confusion_matrix <- function(pred_prob,
                                  truth.,
                                  t_hold = 0.5) {
