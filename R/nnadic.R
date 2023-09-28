@@ -20,7 +20,7 @@ nnadic <- function(data, one_test = TRUE, make_hist = TRUE){
   results <- list()
   results$probs <- stats::predict(object = model, data)
   results$preds <- ifelse(results$probs >= 0.5, 1, 0)
-  if(one_list){
+  if(one_test){
     results$mean  <- mean(results$preds)
     print(paste0("The mean of the predictions is: ", results$mean,
                  " which is `nnadic`'s probability that these data are AI"))
