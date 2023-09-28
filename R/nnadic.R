@@ -10,8 +10,16 @@
 #'
 #' @examples
 #' nnadic(matrix(rnorm(1000), ncol = 2))
-nnadic <- function(data){
-  probabilities <- stats::predict(object = model, data)
-  predictions <- ifelse(probabilities >= 0.5, 1, 0)
-  list(probs = probabilities, preds = predictions)
+nnadic <- function(data, make_hist = TRUE){
+  results <- list()
+  results$probs <- stats::predict(object = model, data)
+  results$preds <- ifelse(probabilities >= 0.5, 1, 0)
+  results$mean  <- mean(preds)
+  if(make_hist){
+    hist(results$probs)
+  }
+  print(paste0("The mean of the predictions is: ", results$mean,
+               " which is `nnadic`'s probability that these data are AI"))
+  print("Probabilities and predictions for each dataset have been returned")
+  return(results)
 }
