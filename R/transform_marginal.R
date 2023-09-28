@@ -48,34 +48,31 @@ get_nnadic_input <- function(data,
                    byrow = FALSE)
   }
   if(dim(data)[2] == 2) {
-    print("You have input a bivariate dataset")
     if(make_exponential == TRUE){
       print("...transforming to exponential marginal distributions")
-      print("...estimated gpd parameters in the marginal transformation were: ")
+      print("...   estimated gpd parameters in the marginal transformation were: ")
       data <- apply(data, 2, transform_to_exponential)
     }
     linfinity <- apply(data, 1, max)
     if(length(linfinity) > 10000){
       print("...more than 10000 points detected")
       if(subsample == TRUE) {
-        print("...you have selected \"subsample = TRUE\" so all points greater")
-        print("...   than the 0.95 quantile will be considered")
+        print("...\"subsample = TRUE\" including all points greater than the 0.95 quantile")
         cutoff_value <- stats::quantile(linfinity, probs = 0.95)
       } else {
-        print("...you have selected \"subsample = FALSE\" so only the")
-        print("...   largest 500 points will be considered")
+        print("...\"subsample = FALSE\" including the largest 500 points")
       cutoff_value <- max(stats::quantile(linfinity, probs = 0.95),
                           (sort(linfinity)[500]))
       }
     } else {
-      print("...fewer than 10000 points detected, points above the 0.95")
-      print("...   quantile will be resampled")
+      print("...fewer than 10000 points detected, points above the 0.95 quantile")
+      print("...   will be resampled")
       cutoff_value <- max(stats::quantile(linfinity, probs = 0.95),
                           (sort(linfinity)[500]))
     }
     temp_indices <- which(linfinity > cutoff_value)
     if(dim(data)[1] > 10000 && length(temp_indices) < 500){
-      "...ties at the cutoff were detected"
+      print("...ties at the cutoff were detected")
       tie_indices <- which(linfinity == cutoff_value)
     }
     indices_mat <- resample_to_500(temp_indices,
@@ -145,8 +142,8 @@ resample_to_500 <- function(indices,
       for(i in 1:num_datasets.){
         indices_matrix[len+1:500, i] <- sample(tie_indices., 500 - len)
       }
-      print(paste0("...subsampled indices of tied points ", num_datasets.))
-      print("...   x to get exactly 500 points in each dataset")
+      print(paste0("...subsampled indices of tied points ", num_datasets., " times so"))
+      print("...   that each dataset has exactly 500 points")
       return(indices_matrix)
     }
     if(include_all. == TRUE){
@@ -164,13 +161,13 @@ resample_to_500 <- function(indices,
                                                           sampling_num,
                                                           replace = TRUE)
     }
-    print("...the rest of the points were subsampled so that all")
-    print(paste0(num_datasets., " have 500 points."))
+    print(paste0("...the rest of the points were subsampled so that all", num_datasets.))
+    print("...   datasets have 500 points."))
     return(indices_matrix)
   } else if(subsample. == FALSE){
     if(len == 500) {
       indices_matrix[1:500, ] <- indices
-      print(paste0("...all ", num_datasets., " are the same and are the 500 largest points"))
+      print(paste0("...all ", num_datasets., "datasets are the same: the 500 largest points"))
       return(indices_matrix)
     } else {
       stop("ERROR: more than 500 present but subsample is FALSE")
@@ -179,8 +176,8 @@ resample_to_500 <- function(indices,
     for(i in 1:num_datasets.){
       indices_matrix[,i] <- sample(indices, 500, replace = TRUE)
     }
-    print(paste0("...points above the 0.95 quantile were subsampled ", num_datasets.))
-    print("...   x so that each dataset has 500 points")
+    print(paste0("...points above the 0.95 quantile were subsampled ", num_datasets., " times"))
+    print("...   so that each dataset has exactly 500 points")
     return(indices_matrix)
   }
 }
