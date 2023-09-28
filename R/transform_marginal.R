@@ -51,24 +51,25 @@ get_nnadic_input <- function(data,
     print("You have input a bivariate dataset")
     if(make_exponential == TRUE){
       print("...transforming to exponential marginal distributions")
+      print("...estimated gpd parameters in the marginal transformation were: ")
       data <- apply(data, 2, transform_to_exponential)
     }
     linfinity <- apply(data, 1, max)
     if(length(linfinity) > 10000){
       print("...more than 10000 points detected")
       if(subsample == TRUE) {
-        print("...you have selected \"subsample = TRUE\" so all
-              points greater than the 0.95 quantile will be considered")
+        print("...you have selected \"subsample = TRUE\" so all points greater")
+        print("...   than the 0.95 quantile will be considered")
         cutoff_value <- stats::quantile(linfinity, probs = 0.95)
       } else {
-        print("...you have selected \"subsample = FALSE\" so only the
-              largest 500 points will be considered")
+        print("...you have selected \"subsample = FALSE\" so only the")
+        print("...   largest 500 points will be considered")
       cutoff_value <- max(stats::quantile(linfinity, probs = 0.95),
                           (sort(linfinity)[500]))
       }
     } else {
-      print("...fewer than 10000 points detected, points above the 0.95
-            quantile will be resampled")
+      print("...fewer than 10000 points detected, points above the 0.95")
+      print("...   quantile will be resampled")
       cutoff_value <- max(stats::quantile(linfinity, probs = 0.95),
                           (sort(linfinity)[500]))
     }
@@ -114,10 +115,7 @@ transform_to_exponential <- function(data) {
                                                           loc = gpd_quant,
                                                           scale = gpd_params[1],
                                                           shape = gpd_params[2])
-    print("The estimated gpd parameters in the marginal transformation were: ")
-    print(paste0("location: ", round(gpd_quant, 3),
-                 "   scale: ", round(gpd_params[1], 3),
-                 "   shape: ", round(gpd_params[2], 3)))
+    print(paste0("location: ", round(gpd_quant, 3), "   scale: ", round(gpd_params[1], 3), "   shape: ", round(gpd_params[2], 3)))
     exp_margins <- qexp(unif_margins)
   } else {
     stop("ERROR: This is not a vector.

@@ -20,15 +20,18 @@ nnadic <- function(data, one_test = TRUE, make_hist = TRUE){
   results <- list()
   results$probs <- stats::predict(object = model, data)
   results$preds <- ifelse(results$probs >= 0.5, 1, 0)
-  if(one_test){
-    results$mean  <- mean(results$preds)
-    print(paste0("The mean of the predictions is: ", results$mean,
-                 " which is `nnadic`'s probability that these data are AI"))
-  }
   if(make_hist){
     hist(results$probs)
   }
-  print("Probabilities and predictions for each dataset have been returned,
-        each probability is the probability of AI which is coded as '1'")
+  print("Probabilities and predictions for each dataset are being returned")
+  print("Each probability is the probability of AI which is coded as '1'")
+
+  if(one_test){
+    results$mean  <- mean(results$preds)
+    print("##################")
+    print(paste0("The mean of the predictions is: ", results$mean,))
+    print("This is `nnadic`'s probability that these data are AI")
+  }
+
   return(results)
 }
