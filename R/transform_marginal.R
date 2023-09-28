@@ -153,7 +153,7 @@ resample_to_500 <- function(indices,
       num_included <- floor(500 / len) * len
       indices_matrix[1:num_included, ] <- indices
       print(paste0("...the first ", num_included, " points in each dataset"))
-      print("...   are the top 5% of points."))
+      print("...   are the top 5% of points.")
       if(num_included == 500){
         return(indices_matrix)
       }
