@@ -29,7 +29,7 @@ nnadic <- function(data, one_test = TRUE, make_hist = TRUE){
   if(one_test){
     results$mean  <- mean(results$preds)
     print("##################")
-    print(paste0("The mean of the predictions is: ", results$mean,))
+    print(paste0("The mean of the predictions is: ", results$mean))
     print("This is `nnadic`'s probability that these data are AI")
   }
 

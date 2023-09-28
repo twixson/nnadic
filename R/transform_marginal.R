@@ -115,7 +115,7 @@ transform_to_exponential <- function(data) {
                                                           loc = gpd_quant,
                                                           scale = gpd_params[1],
                                                           shape = gpd_params[2])
-    print(paste0("location: ", round(gpd_quant, 3), "   scale: ", round(gpd_params[1], 3), "   shape: ", round(gpd_params[2], 3)))
+    print(paste0("...  ...location: ", round(gpd_quant, 3), "   scale: ", round(gpd_params[1], 3), "   shape: ", round(gpd_params[2], 3)))
     exp_margins <- qexp(unif_margins)
   } else {
     stop("ERROR: This is not a vector.
