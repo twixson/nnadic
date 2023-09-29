@@ -41,14 +41,14 @@ Troubleshooting:
 Suggested install code:
 
 ``` r
-Install.packages("remotes")
-remotes::install_github("rstudio/tensorflow")
-remotes::install_github("rstudio/keras")
+Install.packages("remotes", force = TRUE)
+remotes::install_github("rstudio/tensorflow", force = TRUE)
+remotes::install_github("rstudio/keras", force = TRUE)
 reticulate::install_miniconda()
 tensorflow::install_tensorflow()
 keras::install_keras()
 options(timeout = 400)
-install_github("twixson/nnadicTestData")
+install_github("twixson/nnadicTestData", force = TRUE)
 install_github("twixson/nnadic")
 ```
 
@@ -63,28 +63,59 @@ library(nnadicTestData)
 library(evd)      # for generating AD datasets (logistic)
 library(mvtnorm)  # for generating AI datasets (gaussian)
 
-results <- nnadic(test_data_four)
-#> 125/125 - 1s - 915ms/epoch - 7ms/step
-mean(results$preds == test_response_four)
-#> [1] 0.968
-hist(results$probs, freq = F)
+results <- nnadic(test_data_four, one_test = FALSE)
+#> 125/125 - 5s - 5s/epoch - 43ms/step
 ```
 
 <img src="man/figures/README-example-1.png" width="100%" />
 
-``` r
+    #> [1] "Probabilities and predictions for each dataset are being returned"
+    #> [1] "Each probability is the probability of AI which is coded as '1'"
+    mean(results$preds == test_response_four)
+    #> [1] 0.968
 
-data <- rbvevd(10000, dep = 0.5, model = "log")
-data_ready <- get_nnadic_input(data)
-results <- nnadic(data_ready)
-#> 4/4 - 0s - 212ms/epoch - 53ms/step
-mean(results$preds) # should be 0
-#> [1] 0
+    data <- rbvevd(8734, dep = 0.5, model = "log")
+    data_ready <- get_nnadic_input(data)
+    #> [1] "You have input a bivariate dataset"
+    #> [1] "...transforming to exponential marginal distributions"
+    #> [1] "...estimated gpd parameters in the marginal transformation were: "
+    #> [1] "...  ...location: 2.928   scale: 1.078   shape: -0.039"
+    #> [1] "...  ...location: 2.959   scale: 1.049   shape: -0.033"
+    #> [1] "...fewer than 10000 points detected, points above the 0.95"
+    #> [1] "...   quantile will be resampled"
+    #> [1] "...the first 437 points in each dataset"
+    #> [1] "...   are the top 5% of points."
+    #> [1] "...the rest of the points were subsampled so that all"
+    #> [1] "100 have 500 points."
+    results <- nnadic(data_ready, make_hist = FALSE)
+    #> 4/4 - 1s - 1s/epoch - 329ms/step
+    #> [1] "Probabilities and predictions for each dataset are being returned"
+    #> [1] "Each probability is the probability of AI which is coded as '1'"
+    #> [1] "##################"
+    #> [1] "The mean of the predictions is: 0"
+    #> [1] "This is `nnadic`'s probability that these data are AI"
+    # should be 0
 
-data <- rmvnorm(19834, c(0,0), matrix(c(1, 0.5, 0.5, 1), nrow = 2))
-data_ready <- get_nnadic_input(data, subsample = TRUE)
-results <- nnadic(data_ready)
-#> 4/4 - 0s - 38ms/epoch - 9ms/step
-mean(results$preds) # should be 1
-#> [1] 1
-```
+    data <- rmvnorm(19886, c(0,0), matrix(c(1, 0.5, 0.5, 1), nrow = 2))
+    data_ready <- get_nnadic_input(data, subsample = TRUE)
+    #> [1] "You have input a bivariate dataset"
+    #> [1] "...transforming to exponential marginal distributions"
+    #> [1] "...estimated gpd parameters in the marginal transformation were: "
+    #> [1] "...  ...location: 1.647   scale: 0.461   shape: -0.119"
+    #> [1] "...  ...location: 1.635   scale: 0.519   shape: -0.182"
+    #> [1] "...more than 10000 points detected"
+    #> [1] "...you have selected \"subsample = TRUE\" so all points greater"
+    #> [1] "...   than the 0.95 quantile will be considered"
+    #> [1] "...points above the 0.95 quantile were subsampled 100"
+    #> [1] "...   x so that each dataset has 500 points"
+    results <- nnadic(data_ready)
+    #> 4/4 - 0s - 343ms/epoch - 86ms/step
+
+<img src="man/figures/README-example-2.png" width="100%" />
+
+    #> [1] "Probabilities and predictions for each dataset are being returned"
+    #> [1] "Each probability is the probability of AI which is coded as '1'"
+    #> [1] "##################"
+    #> [1] "The mean of the predictions is: 1"
+    #> [1] "This is `nnadic`'s probability that these data are AI"
+    # should be 1
