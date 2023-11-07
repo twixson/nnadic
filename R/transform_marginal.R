@@ -162,7 +162,7 @@ resample_to_500 <- function(indices,
                                                           replace = TRUE)
     }
     print(paste0("...the rest of the points were subsampled so that all", num_datasets.))
-    print("...   datasets have 500 points."))
+    print("...   datasets have 500 points.")
     return(indices_matrix)
   } else if(subsample. == FALSE){
     if(len == 500) {
