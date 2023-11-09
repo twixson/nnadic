@@ -61,14 +61,14 @@ get_nnadic_input <- function(data,
         cutoff_value <- stats::quantile(linfinity, probs = 0.95)
       } else {
         print("...\"subsample = FALSE\" including the largest 500 points")
-      cutoff_value <- max(stats::quantile(linfinity, probs = 0.95),
-                          (sort(linfinity)[500]))
+        cutoff_value <- max(stats::quantile(linfinity, probs = 0.95),
+                           (sort(linfinity, decreasing = T)[500]))
       }
     } else {
       print("...fewer than 10000 points detected, points above the 0.95 quantile")
       print("...   will be resampled")
       cutoff_value <- max(stats::quantile(linfinity, probs = 0.95),
-                          (sort(linfinity)[500]))
+                          (sort(linfinity, decreasing = T)[500]))
     }
     temp_indices <- which(linfinity > cutoff_value)
     if(dim(data)[1] > 10000 && length(temp_indices) < 500){
@@ -140,9 +140,10 @@ resample_to_500 <- function(indices,
     if(!is.null(tie_indices.)){
       indices_matrix[1:len, ] <- indices
       for(i in 1:num_datasets.){
-        indices_matrix[len+1:500, i] <- sample(tie_indices., 500 - len)
+        indices_matrix[(len+1):500, i] <- sample(tie_indices., 500 - len)
       }
-      print(paste0("...subsampled indices of tied points ", num_datasets., " times so"))
+      print(paste0("...subsampled indices of tied points ",
+                   num_datasets., " times so"))
       print("...   that each dataset has exactly 500 points")
       return(indices_matrix)
     }
