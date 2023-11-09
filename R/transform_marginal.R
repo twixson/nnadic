@@ -42,7 +42,7 @@ get_nnadic_input <- function(data,
   if(is.null(dim(data))) {
     print(paste0("I assume this is a time series and am considering lag-",
                  comp_lag))
-    data <- matrix(c(data[1:(length(data-comp_lag))],
+    data <- matrix(c(data[1:(length(data)-comp_lag)],
                      data[(comp_lag + 1):length(data)]),
                    ncol = 2,
                    byrow = FALSE)
