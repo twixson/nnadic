@@ -1,8 +1,7 @@
 .onLoad <- function(libname, pkgname) {
-  model <- keras::keras_model_sequential()
+  model <- keras::keras_model_sequential(input_shape = c(500, 2))
 
   keras::layer_conv_1d(model, kernel_size = c(1), filters = 32, strides = 1,
-                       Input(shape=c(500,2)),
                        # input_shape = c(500, 2),
                        bias_initializer = keras::initializer_constant(value = 0.01))
   keras::layer_activation_leaky_relu(model)
