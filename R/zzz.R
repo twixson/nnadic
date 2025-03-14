@@ -1,5 +1,5 @@
 .onLoad <- function(libname, pkgname) {
-  model <- keras::keras_model_sequential(input_shape = c(500, 2))
+  model <- keras::keras_model_sequential(shape = c(500, 2))
 
   keras::layer_conv_1d(model, kernel_size = c(1), filters = 32, strides = 1,
                        # input_shape = c(500, 2),
