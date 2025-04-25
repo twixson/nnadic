@@ -27,6 +27,6 @@ True Negative | False Negative
 False Positive | True Positive
 }
 \examples{
-predicted_probs <- nnadic(test_data)
-get_confusion_matrix(pred_prob = predicted_prob, truth = test_response)
+predicted_probs <- nnadic(test_data_four)
+get_confusion_matrix(pred_prob = predicted_prob, truth = test_response_four)
 }

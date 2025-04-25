@@ -4,22 +4,31 @@
 \alias{nnadic}
 \title{Neural Network for Asymptotic Dependence/Independence Classification}
 \usage{
-nnadic(data)
+nnadic(data, one_test = TRUE, make_hist = TRUE)
 }
 \arguments{
-\item{data}{a matrix of dimension \eqn{d}x\eqn{2}.
-Currently only supports \eqn{d=500}}
+\item{data}{an array of dimension \eqn{n}x\eqn{d}x\eqn{2}.
+Currently only supports \eqn{d=1000}. Use \code{get_nnadic_input()} to prepare
+your data.}
+
+\item{one_test}{change to \code{FALSE} if there are multiple datasets in your test
+This can be used to test nnadic on simulated datasets where the truth is
+known or on multiple unknown datasets at the same time.}
+
+\item{make_hist}{change to \code{FALSE} if you do not want a histogram of the
+probabilities to be returned.}
 }
 \value{
-a \code{list} with two items:
+a \code{list} with two or three items:
 \enumerate{
 \item probs - a vector of probabilities of being AI
 \item preds - a vector of predictions (0 is AD, 1 is AI)
+\item mean  - the mean of the predictions, included when one_test is TRUE
 }
 }
 \description{
 Neural Network for Asymptotic Dependence/Independence Classification
 }
 \examples{
-nnadic(matrix(rnorm(1000), ncol = 2))
+nnadic(get_nnadic_input(matrix(rnorm(20000), ncol = 2)))
 }

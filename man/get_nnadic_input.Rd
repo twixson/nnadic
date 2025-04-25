@@ -7,7 +7,7 @@
 get_nnadic_input(
   data,
   make_exponential = TRUE,
-  subsample = FALSE,
+  subsample = TRUE,
   num_datasets = 100,
   include_all = TRUE,
   comp_lag = 1
@@ -19,22 +19,23 @@ get_nnadic_input(
 \item{make_exponential}{Change to \code{FALSE} if the data
 already have exponential margins. (defaults to \code{TRUE})}
 
-\item{subsample}{Change to \code{TRUE} if the dataset has
-at least than 10,000 points and you want to subsample all points above the
-0.95 quantile rather than take the top 500 points. (defaults to \code{FALSE})}
+\item{subsample}{Change to \code{FALSE} if the dataset has at least than 10,000
+points and you want to take the top 500 points rather than subsample all
+points above the 0.95 quantile. (defaults to \code{TRUE})}
 
 \item{num_datasets}{The number of output datasets (defaults to \code{100})}
 
 \item{include_all}{If there are fewer than 10,000 points in your data should
-all of the top five percent be included in every dataset (\code{TRUE}) or should
-all 500 points be from resampling (\code{FALSE})? (defaults to \code{TRUE})}
+all of the top five percent be included in every dataset as many times as
+possible (\code{TRUE}) or should all 500 points be from resampling (\code{FALSE})?
+(defaults to \code{TRUE})}
 
 \item{comp_lag}{If your data is a univariate time series the function will
 automatically lag it so that it becomes bivariate. This allows you to
 change the lag. (defaults to \code{1})}
 }
 \value{
-an \code{array} of dimension \code{c(num_datasets, 500, 2)} which can be input
+an \code{array} of dimension \code{c(num_datasets, 1000, 2)} which can be input
 into \code{nnadic()} for prediction.
 }
 \description{
@@ -48,6 +49,9 @@ returned data sets will differ on a small number of points. These points
 are the tied points which are sampled for inclusion in each dataset.
 If your data have less than 10,000 points the top five percent are
 re-sampled up to 500 points 100 different times.
+Note that all datasets will show 1000 points as the 500 largest points are
+repeated, with reflection, to enforce symmetry in all datsets. This makes
+all \code{nnadic()} predictions invariant to components of the random vector.
 }
 \examples{
 get_nnadic_input(my_favorite_data)
