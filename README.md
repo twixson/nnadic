@@ -4,13 +4,14 @@
 # nnadic
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
 The goal of nnadic (**N**eural **N**etwork for **A**symptotic
 **D**ependence/**I**ndependence **C**lassification) is to classify
 bivariate data sets as either asymptotically dependent or independent
-using a trained convolutional neural network. The tool is set up
-to automatically:  
+using a trained convolutional neural network. The tool is set up to
+automatically:  
 - transform the marginal distribution  
 - take the top 5% of the data (using the $l_\infty$-norm)  
 - resample or subsample as necessary to ensure the data is of the
@@ -37,8 +38,8 @@ Troubleshooting:
   `options(timeout = 400)` prior to installation.  
 - The `nnadic` package requires a working `keras` installation. Some
   users have found that installing `keras` first is helpful. This
-  includes ensuring that the python installation needed for the
-  creation of the virtual environment is suitable. 
+  includes ensuring that the python installation needed for the creation
+  of the virtual environment is suitable.
 
 Suggested install code:
 
@@ -63,11 +64,13 @@ This is a basic example which shows you the common workflow:
 library(nnadic)
 #> Welcome to nnadic!
 library(nnadicTestData)
-library(evd)      # for generating AD datasets (logistic)
-library(mvtnorm)  # for generating AI datasets (gaussian)
+library(evd)      # for generating ADep datasets (logistic)
+library(mvtnorm)  # for generating AInd datasets (gaussian)
+
+test_data_four <- make_symmetric(test_data_four)
 
 results <- nnadic(test_data_four, one_test = FALSE)
-#> 125/125 - 5s - 5s/epoch - 43ms/step
+#> 125/125 - 1s - 506ms/epoch - 4ms/step
 ```
 
 <img src="man/figures/README-example-1.png" width="100%" />
@@ -75,50 +78,61 @@ results <- nnadic(test_data_four, one_test = FALSE)
     #> [1] "Probabilities and predictions for each dataset are being returned"
     #> [1] "Each probability is the probability of AI which is coded as '1'"
     mean(results$preds == test_response_four)
-    #> [1] 0.968
+    #> [1] 0.96925
 
-    data <- rbvevd(8734, dep = 0.5, model = "log")
-    data_ready <- get_nnadic_input(data)
-    #> [1] "You have input a bivariate dataset"
-    #> [1] "...transforming to exponential marginal distributions"
-    #> [1] "...estimated gpd parameters in the marginal transformation were: "
-    #> [1] "...  ...location: 2.928   scale: 1.078   shape: -0.039"
-    #> [1] "...  ...location: 2.959   scale: 1.049   shape: -0.033"
-    #> [1] "...fewer than 10000 points detected, points above the 0.95"
-    #> [1] "...   quantile will be resampled"
-    #> [1] "...the first 437 points in each dataset"
-    #> [1] "...   are the top 5% of points."
-    #> [1] "...the rest of the points were subsampled so that all"
-    #> [1] "100 have 500 points."
-    results <- nnadic(data_ready, make_hist = FALSE)
-    #> 4/4 - 1s - 1s/epoch - 329ms/step
+``` r
+# Lets generate a new Adep dataset
+data <- rbvevd(8734, dep = 0.5, model = "log")
+# and test it
+data_ready <- get_nnadic_input(data)
+#> [1] "...transforming to exponential marginal distributions"
+#> [1] "...   estimated gpd parameters in the marginal transformation were: "
+#> [1] "...  ...location: 2.928   scale: 1.078   shape: -0.039"
+#> [1] "...  ...location: 2.959   scale: 1.049   shape: -0.033"
+#> [1] "...fewer than 10000 points detected, points above the 0.95 quantile"
+#> [1] "...   will be resampled"
+#> [1] "...   437 large points identified"
+#> [1] "...the first 437 points in each dataset"
+#> [1] "...   are the top 5% of points (repeated when possible)."
+#> [1] "...the rest of the points were subsampled so that all 100"
+#> [1] "...   datasets have 500 points."
+#> [1] "...each dataset was made symmetric and now has 1000 points."
+results <- nnadic(data_ready)
+#> 4/4 - 0s - 59ms/epoch - 15ms/step
+```
+
+<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
+
     #> [1] "Probabilities and predictions for each dataset are being returned"
     #> [1] "Each probability is the probability of AI which is coded as '1'"
     #> [1] "##################"
-    #> [1] "The mean of the predictions is: 0"
+    #> [1] "The mean of the predictions is: 0.31"
+    #> [1] "The mean of the probabilities is: 0.347213239693083"
     #> [1] "This is `nnadic`'s probability that these data are AI"
     # should be 0
 
-    data <- rmvnorm(19886, c(0,0), matrix(c(1, 0.5, 0.5, 1), nrow = 2))
-    data_ready <- get_nnadic_input(data, subsample = TRUE)
-    #> [1] "You have input a bivariate dataset"
-    #> [1] "...transforming to exponential marginal distributions"
-    #> [1] "...estimated gpd parameters in the marginal transformation were: "
-    #> [1] "...  ...location: 1.647   scale: 0.461   shape: -0.119"
-    #> [1] "...  ...location: 1.635   scale: 0.519   shape: -0.182"
-    #> [1] "...more than 10000 points detected"
-    #> [1] "...you have selected \"subsample = TRUE\" so all points greater"
-    #> [1] "...   than the 0.95 quantile will be considered"
-    #> [1] "...points above the 0.95 quantile were subsampled 100"
-    #> [1] "...   x so that each dataset has 500 points"
-    results <- nnadic(data_ready)
-    #> 4/4 - 0s - 343ms/epoch - 86ms/step
-
-<img src="man/figures/README-example-2.png" width="100%" />
-
-    #> [1] "Probabilities and predictions for each dataset are being returned"
-    #> [1] "Each probability is the probability of AI which is coded as '1'"
-    #> [1] "##################"
-    #> [1] "The mean of the predictions is: 1"
-    #> [1] "This is `nnadic`'s probability that these data are AI"
-    # should be 1
+``` r
+# Lets generate a new Adep dataset
+data <- rmvnorm(19886, c(0,0), matrix(c(1, 0.5, 0.5, 1), nrow = 2))
+# and test it
+data_ready <- get_nnadic_input(data, subsample = TRUE)
+#> [1] "...transforming to exponential marginal distributions"
+#> [1] "...   estimated gpd parameters in the marginal transformation were: "
+#> [1] "...  ...location: 1.647   scale: 0.461   shape: -0.119"
+#> [1] "...  ...location: 1.635   scale: 0.519   shape: -0.182"
+#> [1] "...more than 10000 points detected"
+#> [1] "...\"subsample = TRUE\" including all points greater than the 0.95 quantile"
+#> [1] "...   995 large points identified"
+#> [1] "...points above the 0.95 quantile were subsampled 100 times"
+#> [1] "...   so that each dataset has exactly 500 points."
+#> [1] "...each dataset was made symmetric and now has 1000 points."
+results <- nnadic(data_ready, make_hist = FALSE)
+#> 4/4 - 0s - 21ms/epoch - 5ms/step
+#> [1] "Probabilities and predictions for each dataset are being returned"
+#> [1] "Each probability is the probability of AI which is coded as '1'"
+#> [1] "##################"
+#> [1] "The mean of the predictions is: 1"
+#> [1] "The mean of the probabilities is: 0.999999632239342"
+#> [1] "This is `nnadic`'s probability that these data are AI"
+# should be 1
+```
