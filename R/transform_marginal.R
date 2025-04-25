@@ -10,6 +10,9 @@
 #'   are the tied points which are sampled for inclusion in each dataset.
 #'   If your data have less than 10,000 points the top five percent are
 #'   re-sampled up to 500 points 100 different times.
+#'   Note that all datasets will show 1000 points as the 500 largest points are
+#'   repeated, with reflection, to enforce symmetry in all datsets. This makes
+#'   all `nnadic()` predictions invariant to components of the random vector.
 #'
 #' @param data a matrix with two columns
 #' @param make_exponential Change to `FALSE` if the data
@@ -25,7 +28,7 @@
 #'   automatically lag it so that it becomes bivariate. This allows you to
 #'   change the lag. (defaults to `1`)
 #'
-#' @return an `array` of dimension `c(num_datasets, 500, 2)` which can be input
+#' @return an `array` of dimension `c(num_datasets, 1000, 2)` which can be input
 #'   into `nnadic()` for prediction.
 #' @export
 #'
@@ -83,7 +86,9 @@ get_nnadic_input <- function(data,
     for(i in 1:num_datasets){
       nnadic_input[i, , ] <- data[indices_mat[, i], ]
     }
-    return(nnadic_input)
+
+    symmetric_nnadic_input <- make_symmetric_input(nnadic_input)
+    return(symmetric_nnadic_input)
   } else {
     stop("ERROR: This data matrix has more than two columns,
          input only the two columns you want to compare")
@@ -183,4 +188,31 @@ resample_to_500 <- function(indices,
   }
 }
 
-
+#' Make the data symmetric by copying points with swapped coordinates
+#'
+#' This function takes the 500 largest points $(X,Y)$ and appends the same
+#'  points after reflection across the identity line $(Y, X)$. This ensures all
+#'  input datasets are symmetric and the `nnadic()` classification probabilities
+#'  are invariant to the order of the components in the random vector.
+#'
+#' @param data the matrix or array including dataset(s) of the largest 500 points
+#'
+#' @return an array with 1000 points for each dataset.
+#' @export
+#'
+#' @examples
+#' symmetric_nnadic_input <- make_symmetric_input(largest_500)
+make_symmetric_input <- function(data) {
+  if(length(dim(data)) == 3){
+    temp_array               <- array(NA, dim = c(dim(data)[1], 1000, 2))
+    temp_array[, 1:500, ]    <- data
+    temp_array[, 501:1000, ] <- data[,, c(2,1)]
+  } else if(length(dim(data)) == 2){
+    temp_array               <- array(NA, dim = c(1, 1000, 2))
+    temp_array[1, 1:500, ]    <- data
+    temp_array[1, 501:1000, ] <- data[, c(2,1)]
+  } else {
+    stop("ERROR: did not input a matrix or an array to make_symmetric_input")
+  }
+  return(temp_array)
+}
