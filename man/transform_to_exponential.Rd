@@ -16,5 +16,7 @@ a vector with unit exponential marginal distribution
 Transform marginal distribution to unit exponential
 }
 \examples{
+my_favorite_data <- matrix(rnorm(20000), nrow = 10000)
+exp_margins <- my_favorite_data
 exp_margins[,1] <- transform_to_exponential(my_favorite_data[,1])
 }

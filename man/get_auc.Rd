@@ -18,9 +18,11 @@ curve
 Computes the area under the curve from \code{get_roc()} output
 }
 \examples{
-predicted_probs <- nnadic(test_data)
-roc <- get_roc(predicted_probabilities = predicted_prob,
-               truth = test_response,
+library(nnadicTestData)
+test_data_sym <- make_symmetric(test_data_four)
+predicted_probs <- nnadic(test_data_sym)$probs
+roc <- get_roc(predicted_probabilities = predicted_probs,
+               truth = test_response_four,
                make_plot = TRUE,
                add_auc = TRUE)
 get_auc(roc)

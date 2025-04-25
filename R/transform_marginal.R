@@ -34,6 +34,7 @@
 #' @export
 #'
 #' @examples
+#' my_favorite_data <- matrix(rnorm(20000), nrow = 10000)
 #' get_nnadic_input(my_favorite_data)
 get_nnadic_input <- function(data,
                              make_exponential = TRUE,
@@ -119,6 +120,8 @@ get_nnadic_input <- function(data,
 #' @export
 #'
 #' @examples
+#' my_favorite_data <- matrix(rnorm(20000), nrow = 10000)
+#' exp_margins <- my_favorite_data
 #' exp_margins[,1] <- transform_to_exponential(my_favorite_data[,1])
 transform_to_exponential <- function(data) {
   if(is.null(dim(data))){
@@ -217,6 +220,7 @@ resample_to_500 <- function(indices,
 #' @export
 #'
 #' @examples
+#' largest_500 <- matrix(rnorm(1000), nrow = 500)
 #' symmetric_nnadic_input <- make_symmetric(largest_500)
 make_symmetric <- function(data) {
   if(length(dim(data)) == 3){

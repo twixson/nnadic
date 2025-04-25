@@ -19,5 +19,6 @@ input datasets are symmetric and the \code{nnadic()} classification probabilitie
 are invariant to the order of the components in the random vector.
 }
 \examples{
+largest_500 <- matrix(rnorm(1000), nrow = 500)
 symmetric_nnadic_input <- make_symmetric(largest_500)
 }

@@ -54,5 +54,6 @@ repeated, with reflection, to enforce symmetry in all datsets. This makes
 all \code{nnadic()} predictions invariant to components of the random vector.
 }
 \examples{
+my_favorite_data <- matrix(rnorm(20000), nrow = 10000)
 get_nnadic_input(my_favorite_data)
 }
