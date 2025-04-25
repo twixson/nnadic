@@ -1,7 +1,8 @@
 #' Neural Network for Asymptotic Dependence/Independence Classification
 #'
-#' @param data a matrix of dimension \eqn{d}x\eqn{2}.
-#'  Currently only supports \eqn{d=500}
+#'@param data an array of dimension \eqn{n}x\eqn{d}x\eqn{2}.
+#'  Currently only supports \eqn{d=1000}. Use `get_nnadic_input()` to prepare
+#'  your data.
 #'@param one_test change to `FALSE` if there are multiple datasets in your test
 #'  This can be used to test nnadic on simulated datasets where the truth is
 #'  known or on multiple unknown datasets at the same time.
@@ -15,7 +16,7 @@
 #' @export
 #'
 #' @examples
-#' nnadic(matrix(rnorm(1000), ncol = 2))
+#' nnadic(get_nnadic_input(matrix(rnorm(20000), ncol = 2)))
 nnadic <- function(data, one_test = TRUE, make_hist = TRUE){
   results <- list()
   results$probs <- stats::predict(object = model, data)

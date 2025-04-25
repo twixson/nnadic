@@ -17,13 +17,14 @@
 #' @param data a matrix with two columns
 #' @param make_exponential Change to `FALSE` if the data
 #'   already have exponential margins. (defaults to `TRUE`)
-#' @param subsample Change to `TRUE` if the dataset has
-#'   at least than 10,000 points and you want to subsample all points above the
-#'   0.95 quantile rather than take the top 500 points. (defaults to `FALSE`)
+#' @param subsample Change to `FALSE` if the dataset has at least than 10,000
+#'   points and you want to take the top 500 points rather than subsample all
+#'   points above the 0.95 quantile. (defaults to `TRUE`)
 #' @param num_datasets The number of output datasets (defaults to `100`)
 #' @param include_all If there are fewer than 10,000 points in your data should
-#'   all of the top five percent be included in every dataset (`TRUE`) or should
-#'   all 500 points be from resampling (`FALSE`)? (defaults to `TRUE`)
+#'   all of the top five percent be included in every dataset as many times as
+#'   possible (`TRUE`) or should all 500 points be from resampling (`FALSE`)?
+#'   (defaults to `TRUE`)
 #' @param comp_lag If your data is a univariate time series the function will
 #'   automatically lag it so that it becomes bivariate. This allows you to
 #'   change the lag. (defaults to `1`)
@@ -36,7 +37,7 @@
 #' get_nnadic_input(my_favorite_data)
 get_nnadic_input <- function(data,
                              make_exponential = TRUE,
-                             subsample = FALSE,
+                             subsample = TRUE,
                              num_datasets = 100,
                              include_all = TRUE,
                              comp_lag = 1) {
@@ -67,27 +68,42 @@ get_nnadic_input <- function(data,
         cutoff_value <- max(stats::quantile(linfinity, probs = 0.95),
                            (sort(linfinity, decreasing = T)[500]))
       }
+    } else if(length(linfinity) == 10000){
+      print("...exactly 10000 points detected, points above the 0.95 quantile")
+      print("...   will be retained")
+      cutoff_value <- max(stats::quantile(linfinity, probs = 0.95),
+                          (sort(linfinity, decreasing = T)[500]))
     } else {
       print("...fewer than 10000 points detected, points above the 0.95 quantile")
       print("...   will be resampled")
       cutoff_value <- max(stats::quantile(linfinity, probs = 0.95),
                           (sort(linfinity, decreasing = T)[500]))
     }
-    temp_indices <- which(linfinity > cutoff_value)
+    temp_indices <- which(linfinity >= cutoff_value)
+    print(paste0("...   ", length(temp_indices), " large points identified"))
     if(dim(data)[1] > 10000 && length(temp_indices) < 500){
       print("...ties at the cutoff were detected")
       tie_indices <- which(linfinity == cutoff_value)
     }
-    indices_mat <- resample_to_500(temp_indices,
-                                   tie_indices. = tie_indices,
-                                   subsample. = subsample,
-                                   num_datasets. = num_datasets,
-                                   include_all. = include_all)
-    for(i in 1:num_datasets){
-      nnadic_input[i, , ] <- data[indices_mat[, i], ]
+    if(length(temp_indices) == 500){
+      indices_mat <- matrix(temp_indices, nrow = 500)
+      print(paste0("...all ", num_datasets, " datasets are the same: the 500 largest points."))
+      for(i in 1:num_datasets){
+        nnadic_input[i, , ] <- data[indices_mat[, 1], ]
+      }
+    } else {
+      indices_mat <- resample_to_500(temp_indices,
+                                     tie_indices. = tie_indices,
+                                     subsample. = subsample,
+                                     num_datasets. = num_datasets,
+                                     include_all. = include_all)
+      for(i in 1:num_datasets){
+        nnadic_input[i, , ] <- data[indices_mat[, i], ]
+      }
     }
 
-    symmetric_nnadic_input <- make_symmetric_input(nnadic_input)
+    symmetric_nnadic_input <- make_symmetric(nnadic_input)
+    print("...each dataset was made symmetric and now has 1000 points.")
     return(symmetric_nnadic_input)
   } else {
     stop("ERROR: This data matrix has more than two columns,
@@ -149,14 +165,14 @@ resample_to_500 <- function(indices,
       }
       print(paste0("...subsampled indices of tied points ",
                    num_datasets., " times so"))
-      print("...   that each dataset has exactly 500 points")
+      print("...   that each dataset has exactly 500 points.")
       return(indices_matrix)
     }
     if(include_all. == TRUE){
       num_included <- floor(500 / len) * len
       indices_matrix[1:num_included, ] <- indices
       print(paste0("...the first ", num_included, " points in each dataset"))
-      print("...   are the top 5% of points.")
+      print("...   are the top 5% of points (repeated when possible).")
       if(num_included == 500){
         return(indices_matrix)
       }
@@ -167,13 +183,13 @@ resample_to_500 <- function(indices,
                                                           sampling_num,
                                                           replace = TRUE)
     }
-    print(paste0("...the rest of the points were subsampled so that all", num_datasets.))
+    print(paste0("...the rest of the points were subsampled so that all ", num_datasets.))
     print("...   datasets have 500 points.")
     return(indices_matrix)
   } else if(subsample. == FALSE){
     if(len == 500) {
       indices_matrix[1:500, ] <- indices
-      print(paste0("...all ", num_datasets., "datasets are the same: the 500 largest points"))
+      print(paste0("...all ", num_datasets., " datasets are the same: the 500 largest points."))
       return(indices_matrix)
     } else {
       stop("ERROR: more than 500 present but subsample is FALSE")
@@ -183,7 +199,7 @@ resample_to_500 <- function(indices,
       indices_matrix[,i] <- sample(indices, 500, replace = TRUE)
     }
     print(paste0("...points above the 0.95 quantile were subsampled ", num_datasets., " times"))
-    print("...   so that each dataset has exactly 500 points")
+    print("...   so that each dataset has exactly 500 points.")
     return(indices_matrix)
   }
 }
@@ -201,8 +217,8 @@ resample_to_500 <- function(indices,
 #' @export
 #'
 #' @examples
-#' symmetric_nnadic_input <- make_symmetric_input(largest_500)
-make_symmetric_input <- function(data) {
+#' symmetric_nnadic_input <- make_symmetric(largest_500)
+make_symmetric <- function(data) {
   if(length(dim(data)) == 3){
     temp_array               <- array(NA, dim = c(dim(data)[1], 1000, 2))
     temp_array[, 1:500, ]    <- data
@@ -212,7 +228,7 @@ make_symmetric_input <- function(data) {
     temp_array[1, 1:500, ]    <- data
     temp_array[1, 501:1000, ] <- data[, c(2,1)]
   } else {
-    stop("ERROR: did not input a matrix or an array to make_symmetric_input")
+    stop("ERROR: did not input a matrix or an array to make_symmetric")
   }
   return(temp_array)
 }
