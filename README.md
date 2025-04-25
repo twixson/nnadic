@@ -70,7 +70,7 @@ library(mvtnorm)  # for generating AInd datasets (gaussian)
 test_data_four <- make_symmetric(test_data_four)
 
 results <- nnadic(test_data_four, one_test = FALSE)
-#> 125/125 - 1s - 508ms/epoch - 4ms/step
+#> 125/125 - 1s - 503ms/epoch - 4ms/step
 ```
 
 <img src="man/figures/README-example-1.png" width="100%" />
@@ -99,7 +99,7 @@ data_ready <- get_nnadic_input(data)
 #> [1] "...   datasets have 500 points."
 #> [1] "...each dataset was made symmetric and now has 1000 points."
 results <- nnadic(data_ready)
-#> 4/4 - 0s - 59ms/epoch - 15ms/step
+#> 4/4 - 0s - 61ms/epoch - 15ms/step
 ```
 
 <img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
@@ -109,6 +109,8 @@ results <- nnadic(data_ready)
     #> [1] "##################"
     #> [1] "The mean of the predictions is: 0"
     #> [1] "This is `nnadic`'s probability that these data are AI"
+    results$mean
+    #> [1] 0
     # should be 0
 
 ``` r
@@ -127,11 +129,13 @@ data_ready <- get_nnadic_input(data, subsample = TRUE)
 #> [1] "...   so that each dataset has exactly 500 points."
 #> [1] "...each dataset was made symmetric and now has 1000 points."
 results <- nnadic(data_ready, make_hist = FALSE)
-#> 4/4 - 0s - 19ms/epoch - 5ms/step
+#> 4/4 - 0s - 20ms/epoch - 5ms/step
 #> [1] "Probabilities and predictions for each dataset are being returned"
 #> [1] "Each probability is the probability of AI which is coded as '1'"
 #> [1] "##################"
 #> [1] "The mean of the predictions is: 1"
 #> [1] "This is `nnadic`'s probability that these data are AI"
+results$mean
+#> [1] 1
 # should be 1
 ```
