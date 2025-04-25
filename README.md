@@ -70,7 +70,7 @@ library(mvtnorm)  # for generating AInd datasets (gaussian)
 test_data_four <- make_symmetric(test_data_four)
 
 results <- nnadic(test_data_four, one_test = FALSE)
-#> 125/125 - 1s - 506ms/epoch - 4ms/step
+#> 125/125 - 1s - 508ms/epoch - 4ms/step
 ```
 
 <img src="man/figures/README-example-1.png" width="100%" />
@@ -81,14 +81,15 @@ results <- nnadic(test_data_four, one_test = FALSE)
     #> [1] 0.96925
 
 ``` r
+set.seed(2938)
 # Lets generate a new Adep dataset
 data <- rbvevd(8734, dep = 0.5, model = "log")
 # and test it
 data_ready <- get_nnadic_input(data)
 #> [1] "...transforming to exponential marginal distributions"
 #> [1] "...   estimated gpd parameters in the marginal transformation were: "
-#> [1] "...  ...location: 2.928   scale: 1.078   shape: -0.039"
-#> [1] "...  ...location: 2.959   scale: 1.049   shape: -0.033"
+#> [1] "...  ...location: 3.036   scale: 0.977   shape: 0.045"
+#> [1] "...  ...location: 2.985   scale: 1.019   shape: 0.025"
 #> [1] "...fewer than 10000 points detected, points above the 0.95 quantile"
 #> [1] "...   will be resampled"
 #> [1] "...   437 large points identified"
@@ -106,8 +107,7 @@ results <- nnadic(data_ready)
     #> [1] "Probabilities and predictions for each dataset are being returned"
     #> [1] "Each probability is the probability of AI which is coded as '1'"
     #> [1] "##################"
-    #> [1] "The mean of the predictions is: 0.31"
-    #> [1] "The mean of the probabilities is: 0.347213239693083"
+    #> [1] "The mean of the predictions is: 0"
     #> [1] "This is `nnadic`'s probability that these data are AI"
     # should be 0
 
@@ -118,8 +118,8 @@ data <- rmvnorm(19886, c(0,0), matrix(c(1, 0.5, 0.5, 1), nrow = 2))
 data_ready <- get_nnadic_input(data, subsample = TRUE)
 #> [1] "...transforming to exponential marginal distributions"
 #> [1] "...   estimated gpd parameters in the marginal transformation were: "
-#> [1] "...  ...location: 1.647   scale: 0.461   shape: -0.119"
-#> [1] "...  ...location: 1.635   scale: 0.519   shape: -0.182"
+#> [1] "...  ...location: 1.655   scale: 0.48   shape: -0.126"
+#> [1] "...  ...location: 1.672   scale: 0.47   shape: -0.121"
 #> [1] "...more than 10000 points detected"
 #> [1] "...\"subsample = TRUE\" including all points greater than the 0.95 quantile"
 #> [1] "...   995 large points identified"
@@ -127,12 +127,11 @@ data_ready <- get_nnadic_input(data, subsample = TRUE)
 #> [1] "...   so that each dataset has exactly 500 points."
 #> [1] "...each dataset was made symmetric and now has 1000 points."
 results <- nnadic(data_ready, make_hist = FALSE)
-#> 4/4 - 0s - 21ms/epoch - 5ms/step
+#> 4/4 - 0s - 19ms/epoch - 5ms/step
 #> [1] "Probabilities and predictions for each dataset are being returned"
 #> [1] "Each probability is the probability of AI which is coded as '1'"
 #> [1] "##################"
 #> [1] "The mean of the predictions is: 1"
-#> [1] "The mean of the probabilities is: 0.999999632239342"
 #> [1] "This is `nnadic`'s probability that these data are AI"
 # should be 1
 ```

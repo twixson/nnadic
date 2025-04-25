@@ -88,6 +88,7 @@ mean(results$preds == test_response_four)
 
 
 ```{r}
+set.seed(2938)
 # Lets generate a new Adep dataset
 data <- rbvevd(8734, dep = 0.5, model = "log")
 # and test it
