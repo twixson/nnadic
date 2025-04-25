@@ -3,15 +3,15 @@
 
   keras::layer_conv_1d(model, kernel_size = c(1), filters = 128, strides = 1,
                      input_shape = c(1000, 2),
-                     bias_initializer = 
+                     bias_initializer =
                        keras::initializer_constant(value = 0.01))
 keras::layer_activation_leaky_relu(model)
 keras::layer_conv_1d(model, kernel_size = c(1), filters = 64,
-                     bias_initializer = 
+                     bias_initializer =
                        keras::initializer_constant(value = 0.01))
 keras::layer_activation_leaky_relu(model)
 keras::layer_conv_1d(model, kernel_size = c(1), filters = 32,
-                     bias_initializer = 
+                     bias_initializer =
                        keras::initializer_constant(value = 0.01))
 keras::layer_activation_leaky_relu(model, name = "feature_layer")
 keras::layer_average_pooling_1d(model, pool_size = 1000)

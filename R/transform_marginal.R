@@ -66,8 +66,7 @@ get_nnadic_input <- function(data,
         cutoff_value <- stats::quantile(linfinity, probs = 0.95)
       } else {
         print("...\"subsample = FALSE\" including the largest 500 points")
-        cutoff_value <- max(stats::quantile(linfinity, probs = 0.95),
-                           (sort(linfinity, decreasing = T)[500]))
+        cutoff_value <- sort(linfinity, decreasing = T)[500]
       }
     } else if(length(linfinity) == 10000){
       print("...exactly 10000 points detected, points above the 0.95 quantile")
