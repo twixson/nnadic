@@ -64,22 +64,25 @@ get_nnadic_input <- function(data,
       if(subsample == TRUE) {
         print("...\"subsample = TRUE\" including all points greater than the 0.95 quantile")
         cutoff_value <- stats::quantile(linfinity, probs = 0.95)
+        temp_indices <- which(linfinity > cutoff_value)
       } else {
         print("...\"subsample = FALSE\" including the largest 500 points")
         cutoff_value <- sort(linfinity, decreasing = T)[500]
+        temp_indices <- which(linfinity > cutoff_value)
       }
     } else if(length(linfinity) == 10000){
       print("...exactly 10000 points detected, points above the 0.95 quantile")
       print("...   will be retained")
       cutoff_value <- max(stats::quantile(linfinity, probs = 0.95),
                           (sort(linfinity, decreasing = T)[500]))
+      temp_indices <- which(linfinity >= cutoff_value)
     } else {
       print("...fewer than 10000 points detected, points above the 0.95 quantile")
       print("...   will be resampled")
       cutoff_value <- max(stats::quantile(linfinity, probs = 0.95),
                           (sort(linfinity, decreasing = T)[500]))
+      temp_indices <- which(linfinity >= cutoff_value)
     }
-    temp_indices <- which(linfinity >= cutoff_value)
     print(paste0("...   ", length(temp_indices), " large points identified"))
     if(dim(data)[1] > 10000 && length(temp_indices) < 500){
       print("...ties at the cutoff were detected")
