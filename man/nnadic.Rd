@@ -4,7 +4,7 @@
 \alias{nnadic}
 \title{Neural Network for Asymptotic Dependence/Independence Classification}
 \usage{
-nnadic(data, one_test = TRUE, make_hist = TRUE)
+nnadic(data, one_test = TRUE, make_hist = TRUE, verbose = TRUE)
 }
 \arguments{
 \item{data}{an array of dimension \eqn{n}x\eqn{d}x\eqn{2}.
@@ -17,6 +17,8 @@ known or on multiple unknown datasets at the same time.}
 
 \item{make_hist}{change to \code{FALSE} if you do not want a histogram of the
 probabilities to be returned.}
+
+\item{verbose}{Switch to \code{FALSE} to skip comments. (defaults to \code{TRUE})}
 }
 \value{
 a \code{list} with two or three items:

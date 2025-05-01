@@ -28,6 +28,7 @@
 #' @param comp_lag If your data is a univariate time series the function will
 #'   automatically lag it so that it becomes bivariate. This allows you to
 #'   change the lag. (defaults to `1`)
+#' @param verbose Switch to `FALSE` to skip comments. (defaults to `TRUE`)
 #'
 #' @return an `array` of dimension `c(num_datasets, 1000, 2)` which can be input
 #'   into `nnadic()` for prediction.
@@ -41,12 +42,15 @@ get_nnadic_input <- function(data,
                              subsample = TRUE,
                              num_datasets = 100,
                              include_all = TRUE,
-                             comp_lag = 1) {
+                             comp_lag = 1,
+                             verbose = TRUE) {
   nnadic_input <- array(NA, dim = c(num_datasets, 500, 2))
   tie_indices <- NULL
   if(is.null(dim(data))) {
-    print(paste0("I assume this is a time series and am considering lag-",
+    if(verbose){
+      print(paste0("I assume this is a time series and am considering lag-",
                  comp_lag))
+      }
     data <- matrix(c(data[1:(length(data)-comp_lag)],
                      data[(comp_lag + 1):length(data)]),
                    ncol = 2,
@@ -54,43 +58,62 @@ get_nnadic_input <- function(data,
   }
   if(dim(data)[2] == 2) {
     if(make_exponential == TRUE){
-      print("...transforming to exponential marginal distributions")
-      print("...   estimated gpd parameters in the marginal transformation were: ")
+      if(verbose){
+        print("...transforming to exponential marginal distributions")
+        print("...   estimated gpd parameters in the marginal transformation were: ")
+      }
       data <- apply(data, 2, transform_to_exponential)
     }
     linfinity <- apply(data, 1, max)
     if(length(linfinity) > 10000){
-      print("...more than 10000 points detected")
+      if(verbose){
+        print("...more than 10000 points detected")
+      }
       if(subsample == TRUE) {
-        print("...\"subsample = TRUE\" including all points greater than the 0.95 quantile")
+        if(verbose){
+          print("...\"subsample = TRUE\" including all points greater than the 0.95 quantile")
+        }
         cutoff_value <- stats::quantile(linfinity, probs = 0.95)
         temp_indices <- which(linfinity > cutoff_value)
       } else {
-        print("...\"subsample = FALSE\" including the largest 500 points")
+        if(verbose){
+          print("...\"subsample = FALSE\" including the largest 500 points")
+        }
         cutoff_value <- sort(linfinity, decreasing = T)[500]
         temp_indices <- which(linfinity > cutoff_value)
       }
     } else if(length(linfinity) == 10000){
-      print("...exactly 10000 points detected, points above the 0.95 quantile")
-      print("...   will be retained")
+      if(verbose){
+        print("...exactly 10000 points detected, points above the 0.95 quantile")
+        print("...   will be retained")
+      }
       cutoff_value <- max(stats::quantile(linfinity, probs = 0.95),
                           (sort(linfinity, decreasing = T)[500]))
       temp_indices <- which(linfinity >= cutoff_value)
     } else {
-      print("...fewer than 10000 points detected, points above the 0.95 quantile")
-      print("...   will be resampled")
+      if(verbose){
+        print("...fewer than 10000 points detected, points above the 0.95 quantile")
+        print("...   will be resampled")
+      }
       cutoff_value <- max(stats::quantile(linfinity, probs = 0.95),
                           (sort(linfinity, decreasing = T)[500]))
       temp_indices <- which(linfinity >= cutoff_value)
     }
-    print(paste0("...   ", length(temp_indices), " large points identified"))
+    if(verbose){
+      print(paste0("...   ", length(temp_indices), " large points identified"))
+    }
     if(dim(data)[1] > 10000 && length(temp_indices) < 500){
-      print("...ties at the cutoff were detected")
+      if(verbose){
+        print("...ties at the cutoff were detected")
+      }
       tie_indices <- which(linfinity == cutoff_value)
     }
     if(length(temp_indices) == 500){
       indices_mat <- matrix(temp_indices, nrow = 500)
-      print(paste0("...all ", num_datasets, " datasets are the same: the 500 largest points."))
+      if(verbose){
+        print(paste0("...all ", num_datasets,
+                     " datasets are the same: the 500 largest points."))
+      }
       for(i in 1:num_datasets){
         nnadic_input[i, , ] <- data[indices_mat[, 1], ]
       }
@@ -99,14 +122,17 @@ get_nnadic_input <- function(data,
                                      tie_indices. = tie_indices,
                                      subsample. = subsample,
                                      num_datasets. = num_datasets,
-                                     include_all. = include_all)
+                                     include_all. = include_all,
+                                     verbose. = verbose)
       for(i in 1:num_datasets){
         nnadic_input[i, , ] <- data[indices_mat[, i], ]
       }
     }
 
     symmetric_nnadic_input <- make_symmetric(nnadic_input)
-    print("...each dataset was made symmetric and now has 1000 points.")
+    if(verbose){
+      print("...each dataset was made symmetric and now has 1000 points.")
+    }
     return(symmetric_nnadic_input)
   } else {
     stop("ERROR: This data matrix has more than two columns,
@@ -117,6 +143,7 @@ get_nnadic_input <- function(data,
 #' Transform marginal distribution to unit exponential
 #'
 #' @param data a vector of observations
+#' @param verbose Switch to `FALSE` to skip comments. (defaults to `TRUE`)
 #'
 #' @return a vector with unit exponential marginal distribution
 #' @export
@@ -125,7 +152,7 @@ get_nnadic_input <- function(data,
 #' my_favorite_data <- matrix(rnorm(20000), nrow = 10000)
 #' exp_margins <- my_favorite_data
 #' exp_margins[,1] <- transform_to_exponential(my_favorite_data[,1])
-transform_to_exponential <- function(data) {
+transform_to_exponential <- function(data, verbose = TRUE) {
   if(is.null(dim(data))){
     unif_margins <- rep(NA, length(data))
     gpd_quant    <- quantile(data, prob = 0.95)
@@ -138,7 +165,11 @@ transform_to_exponential <- function(data) {
                                                           loc = gpd_quant,
                                                           scale = gpd_params[1],
                                                           shape = gpd_params[2])
-    print(paste0("...  ...location: ", round(gpd_quant, 3), "   scale: ", round(gpd_params[1], 3), "   shape: ", round(gpd_params[2], 3)))
+    if(verbose){
+      print(paste0("...  ...location: ", round(gpd_quant, 3),
+                   "   scale: ", round(gpd_params[1], 3),
+                   "   shape: ", round(gpd_params[2], 3)))
+    }
     exp_margins <- qexp(unif_margins)
   } else {
     stop("ERROR: This is not a vector.
@@ -153,7 +184,8 @@ resample_to_500 <- function(indices,
                             tie_indices. = NULL,
                             subsample.,
                             num_datasets.,
-                            include_all.){
+                            include_all.,
+                            verbose. = TRUE){
   if(!is.null(dim(indices))){
     stop("ERROR: Need a vector of indices")
   }
@@ -168,16 +200,20 @@ resample_to_500 <- function(indices,
       for(i in 1:num_datasets.){
         indices_matrix[(len+1):500, i] <- sample(tie_indices., 500 - len)
       }
-      print(paste0("...subsampled indices of tied points ",
-                   num_datasets., " times so"))
-      print("...   that each dataset has exactly 500 points.")
+      if(verbose.){
+        print(paste0("...subsampled indices of tied points ",
+                    num_datasets., " times so"))
+        print("...   that each dataset has exactly 500 points.")
+      }
       return(indices_matrix)
     }
     if(include_all. == TRUE){
       num_included <- floor(500 / len) * len
       indices_matrix[1:num_included, ] <- indices
-      print(paste0("...the first ", num_included, " points in each dataset"))
-      print("...   are the top 5% of points (repeated when possible).")
+      if(verbose.){
+        print(paste0("...the first ", num_included, " points in each dataset"))
+        print("...   are the top 5% of points (repeated when possible).")
+      }
       if(num_included == 500){
         return(indices_matrix)
       }
@@ -188,13 +224,19 @@ resample_to_500 <- function(indices,
                                                           sampling_num,
                                                           replace = TRUE)
     }
-    print(paste0("...the rest of the points were subsampled so that all ", num_datasets.))
-    print("...   datasets have 500 points.")
+    if(verbose.){
+      print(paste0("...the rest of the points were subsampled so that all ",
+                   num_datasets.))
+      print("...   datasets have 500 points.")
+    }
     return(indices_matrix)
   } else if(subsample. == FALSE){
     if(len == 500) {
       indices_matrix[1:500, ] <- indices
-      print(paste0("...all ", num_datasets., " datasets are the same: the 500 largest points."))
+      if(verbose.){
+        print(paste0("...all ", num_datasets.,
+                     " datasets are the same: the 500 largest points."))
+      }
       return(indices_matrix)
     } else {
       stop("ERROR: more than 500 present but subsample is FALSE")
@@ -203,8 +245,11 @@ resample_to_500 <- function(indices,
     for(i in 1:num_datasets.){
       indices_matrix[,i] <- sample(indices, 500, replace = TRUE)
     }
-    print(paste0("...points above the 0.95 quantile were subsampled ", num_datasets., " times"))
-    print("...   so that each dataset has exactly 500 points.")
+    if(verbose.){
+      print(paste0("...points above the 0.95 quantile were subsampled ",
+                   num_datasets., " times"))
+      print("...   so that each dataset has exactly 500 points.")
+    }
     return(indices_matrix)
   }
 }

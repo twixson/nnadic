@@ -10,7 +10,8 @@ get_nnadic_input(
   subsample = TRUE,
   num_datasets = 100,
   include_all = TRUE,
-  comp_lag = 1
+  comp_lag = 1,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -33,6 +34,8 @@ possible (\code{TRUE}) or should all 500 points be from resampling (\code{FALSE}
 \item{comp_lag}{If your data is a univariate time series the function will
 automatically lag it so that it becomes bivariate. This allows you to
 change the lag. (defaults to \code{1})}
+
+\item{verbose}{Switch to \code{FALSE} to skip comments. (defaults to \code{TRUE})}
 }
 \value{
 an \code{array} of dimension \code{c(num_datasets, 1000, 2)} which can be input
