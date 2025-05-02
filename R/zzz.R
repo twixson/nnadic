@@ -33,7 +33,7 @@ keras::layer_activation_leaky_relu(model)
 keras::layer_dense(model, units = 1, activation = "sigmoid")
 
   keras::load_model_weights_hdf5(model, filepath =
-      system.file("pretrained_models/final_weights_revision.hdf5",
+      system.file("pretrained_models/weights_DeepSets_finalDataModel_exp2b_050225.hdf5",
                     package = "nnadic"))
     assign("model", model, envir = parent.env(environment()))
 }
