@@ -62,7 +62,7 @@ get_nnadic_input <- function(data,
         print("...transforming to exponential marginal distributions")
         print("...   estimated gpd parameters in the marginal transformation were: ")
       }
-      data <- apply(data, 2, transform_to_exponential)
+      data <- apply(data, 2, transform_to_exponential, verbose. = verbose)
     }
     linfinity <- apply(data, 1, max)
     if(length(linfinity) > 10000){
@@ -152,7 +152,7 @@ get_nnadic_input <- function(data,
 #' my_favorite_data <- matrix(rnorm(20000), nrow = 10000)
 #' exp_margins <- my_favorite_data
 #' exp_margins[,1] <- transform_to_exponential(my_favorite_data[,1])
-transform_to_exponential <- function(data, verbose = TRUE) {
+transform_to_exponential <- function(data, verbose. = TRUE) {
   if(is.null(dim(data))){
     unif_margins <- rep(NA, length(data))
     gpd_quant    <- quantile(data, prob = 0.95)
@@ -165,7 +165,7 @@ transform_to_exponential <- function(data, verbose = TRUE) {
                                                           loc = gpd_quant,
                                                           scale = gpd_params[1],
                                                           shape = gpd_params[2])
-    if(verbose){
+    if(verbose.){
       print(paste0("...  ...location: ", round(gpd_quant, 3),
                    "   scale: ", round(gpd_params[1], 3),
                    "   shape: ", round(gpd_params[2], 3)))
