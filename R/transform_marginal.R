@@ -179,12 +179,38 @@ transform_to_exponential <- function(data, verbose. = TRUE) {
 }
 
 
-
+#' Get indices for the 500 points to be used as `nnadic` input
+#'
+#' Input your large indices and get out the appropriate sub/re-sampled indices.
+#'
+#' @param indices a vector with of indices of large points
+#' @param tie_indices. vector of indices for tied values at the
+#'   large-point-cutoff
+#' @param subsample. Set to `FALSE` if the dataset has at least than 10,000
+#'   points and you want to take the top 500 points rather than subsample all
+#'   points above the 0.95 quantile. (defaults to `TRUE`)
+#' @param num_datasets. The number of output datasets (defaults to `100`)
+#' @param include_all. If there are fewer than 10,000 points in your data should
+#'   all of the top five percent be included in every dataset as many times as
+#'   possible (`TRUE`) or should all 500 points be from resampling (`FALSE`)?
+#'   (defaults to `TRUE`)
+#' @param comp_lag If your data is a univariate time series the function will
+#'   automatically lag it so that it becomes bivariate. This allows you to
+#'   change the lag. (defaults to `1`)
+#' @param verbose Switch to `FALSE` to skip comments. (defaults to `TRUE`)
+#'
+#' @return a `matrix` of dimension `c(500, num_datasets)` containing indices
+#'   of large points after sub/re-sampling
+#' @export
+#'
+#' @examples
+#' sample_inds <- sample(1:9000, size = 450)
+#' resample_to_500(sample_inds, num_datasets. = 1)
 resample_to_500 <- function(indices,
                             tie_indices. = NULL,
-                            subsample.,
-                            num_datasets.,
-                            include_all.,
+                            subsample. = TRUE,
+                            num_datasets. = 100,
+                            include_all. = TRUE,
                             verbose. = TRUE){
   if(!is.null(dim(indices))){
     stop("ERROR: Need a vector of indices")
