@@ -1,0 +1,388 @@
+---
+title: "Tutorial"
+author: Troy P. Wixson
+output: pdf_document
+date: "2025-05-06"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "tutorial",
+  out.width = "100%"
+)
+```
+
+# nnadic
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of nnadic (**N**eural **N**etwork for **A**symptotic
+**D**ependence/**I**ndependence **C**lassification) is to classify
+bivariate data sets as either asymptotically dependent or independent
+using a trained convolutional neural network. The tool is set up
+to automatically:  
+- transform the marginal distribution  
+- take the top 5% of the data (using the $l_\infty$-norm)  
+- resample or subsample as necessary to ensure the data is of the
+correct dimension  
+- output the predicted result from the neural network
+    
+## Installation
+
+You can install the development version of nnadic from
+[GitHub](https://github.com/). We suggest the following suggested install code
+which overcomes common installation issues:
+
+
+``` r
+install.packages("remotes", force = TRUE)
+remotes::install_github("rstudio/tensorflow", force = TRUE)
+remotes::install_github("rstudio/keras", force = TRUE)
+reticulate::install_miniconda()
+tensorflow::install_tensorflow()
+reticulate::install_python(version = '3.9')
+keras::install_keras()
+options(timeout = 400)
+install_github("twixson/nnadicTestData", force = TRUE)
+install_github("twixson/nnadic")
+```
+
+
+## Introduction
+
+### Classifier Structure
+
+The `nnadic` classifier is a neural network that is composed of two component 
+networks that are linked with a permutation invariant aggregation function. 
+The first component network extracts features from each point. The aggregation
+function averages each feature across points. The second component network maps
+the averaged features to a value between zero (ADep) and one (AInd). This
+architecture fits in the DeepSets framework by of [Zaheer et al. (2017)](https://proceedings.neurips.cc/paper_files/paper/2017/file/f22e4747da1aa27e363d86d40ff442fe-Paper.pdf).
+
+Let $(\boldsymbol{W}^{(l)}_{\psi}, \boldsymbol{b}^{(l)}_{\psi})$ denote the 
+parameters of the $l^{\text{th}}$ layer of the feature network 
+$\boldsymbol{\psi}$, 
+$(\boldsymbol{W}^{(l)}_{\phi}, \boldsymbol{b}^{(l)}_{\phi})$ denote the 
+parameters of the $l^{\text{th}}$ layer of the inference network $\phi$, 
+$\boldsymbol{\gamma}_{\psi} = \big(\boldsymbol{W}^{(1)}_{\psi}, \boldsymbol{b}^{(1)}_{\psi}, \dots, \boldsymbol{W}^{(L_{\psi})}_{\psi}, \boldsymbol{b}^{(L_{\psi})}_{\psi}\big)$, and 
+$\boldsymbol{\gamma}_{\phi} = \big(\boldsymbol{W}^{(1)}_{\phi}, \boldsymbol{b}^{(1)}_{\phi}, \dots, \boldsymbol{W}^{(L_{\phi})}_{\phi}, \boldsymbol{b}^{(L_{\phi})}_{\phi}\big)$. Let 
+$\boldsymbol{\gamma} = (\boldsymbol{\gamma}_{\psi}, \boldsymbol{\gamma}_{\phi})$ 
+denote the collection of parameters in $\hat{g}$. 
+Our network can be represented as 
+\begin{align}
+    \hat{g}(\boldsymbol{X}^{(m)}, \boldsymbol{\gamma}) = & 
+      \phi\big[ A(\boldsymbol{X}^{(m)}, \boldsymbol{\gamma}_{\psi} ), 
+      \boldsymbol{\gamma}_{\phi} \big]\\
+    A(\boldsymbol{X}^{(m)}, \boldsymbol{\gamma}_{\psi} ) = & 
+      \frac{1}{m} \boldsymbol{1}^{T} \boldsymbol{\psi}(\boldsymbol{X}^{(m)}, 
+      \boldsymbol{\gamma}_{\psi}) 
+\end{align}
+where $\boldsymbol{1}^T$ is a row-vector of ones and thus we are computing the 
+column-wise (point-wise) averages. 
+In the following representation of our network we adopt a notation that is 
+standard to deep learning; for matrix 
+$\boldsymbol{Z} = (\boldsymbol{z}_1 \hspace{0.05in} \dots \hspace{0.05in} \boldsymbol{z}_q)$ 
+(where the $\boldsymbol{z}_j$ are understood to be the column vectors of 
+$\boldsymbol{Z}$) and column vector $\boldsymbol{v}$ define 
+$\boldsymbol{Z} + \boldsymbol{v} := (\boldsymbol{z}_1 + \boldsymbol{v} \hspace{0.05in} \dots \hspace{0.05in} \boldsymbol{z}_q+\boldsymbol{v})$.
+Our feature network can, due to the desired separability, be represented as
+\begin{align}
+    \boldsymbol{h}^{(1)}_{\psi} = & 
+      \sigma\big(\boldsymbol{X}^{(m)}\boldsymbol{W}^{(1)}_{\psi} + 
+      \boldsymbol{b}^{(1)}_{\psi}\big), \\
+    \boldsymbol{h}^{(l)}_{\psi} = & 
+      \sigma\big(\boldsymbol{h}^{(l-1)}_{\psi} \boldsymbol{W}^{(l)}_{\psi} + 
+      \boldsymbol{b}^{(l)}_{\psi}\big), \hspace{0.1in} l = 2, \dots, L_{\psi}-1, \\
+    \boldsymbol{\psi}(\boldsymbol{X}^{(m)}, \boldsymbol{\gamma}_{\psi}) = & 
+      \sigma\big( \boldsymbol{h}^{(L_{\psi}-1)}_{\psi} 
+      \boldsymbol{W}^{(L_{\psi})}_{\psi} + \boldsymbol{b}^{(L_{\psi})}_{\psi}\big).
+\end{align}
+Here $\boldsymbol{h}^{(l)}_{\psi}$ is the output of the $l^{\text{th}}$ 
+(hidden) layer of the $\boldsymbol{\psi}$-network, $\sigma$ is an activation 
+function, and $\boldsymbol{W}^{(l)}_{\psi}$ contains column-wise feature weights. 
+Letting $q^{(l)}$ denote the feature dimension of the $l^{\text{th}}$ layer, 
+we note that each 
+$\boldsymbol{W}^{(l)} \in \mathbb{R}^{q^{(l-1)} \times q^{(l)}}$ and thus the 
+output from the $l^{\text{th}}$ layer is $m \times q^{(l)}$. 
+Aggregation across points results in a $q$-vector which is input into the 
+inference network $\phi$. 
+The inference network can be represented as 
+\begin{align}
+    \boldsymbol{h}^{(1)}_{\phi} = & 
+      \sigma\big(\boldsymbol{W}^{(1)}_{\phi} A(\boldsymbol{X}^{(m)}, 
+      \boldsymbol{\gamma}_{\psi} ) + \boldsymbol{b}^{(1)}_{\phi}\big), \\
+    \boldsymbol{h}^{(l)}_{\phi} = & 
+      \sigma\big( \boldsymbol{W}^{(l)}_{\phi} \boldsymbol{h}^{(l-1)}_{\phi} + 
+      \boldsymbol{b}^{(l)}_{\phi}\big), \hspace{0.1in} l = 2, \dots, L_{\phi}-1, \\
+    \boldsymbol{\phi}(\boldsymbol{X}^{(m)}, \boldsymbol{\gamma}_{\phi}) = & 
+      \sigma^{(L_{\phi})}\big( \boldsymbol{W}^{(L_{\phi})}_{\phi} 
+      \boldsymbol{h}^{(L_{\phi}-1)}_{\phi}  + \boldsymbol{b}^{(L_{\phi})}_{\phi}\big).
+\end{align}
+All layers of $\hat{g}$ (except the final layer) are activated with the leaky 
+relu function [(Maas et al. 2013)](https://www.awnihannun.com/papers/relu_hybrid_icml2013_final.pdf).
+This function is defined piece-wise such that for input $z \geq 0$, 
+$\sigma(z) = z$ and for input $z < 0$, $\sigma(z) = az$ for some constant $a$ 
+close to zero (we use 0.01). 
+
+### How to get inputs
+
+Inputs to `nnadic` are the large observations from some dataset of interest. 
+
+The data must first be transformed to exponential margins. This can be done with
+the `nnadic`'s function `transform_to_exponential()` which uses the empirical 
+distribution function for points below the 0.95-quantile and a generalized 
+Pareto distribution fit to points above the 0.95-quantile and to transform the 
+data to be marginally uniformly distributed. The probability integral 
+transformation is used to transform those data to be marginally exponential.
+This function works on one margin at a time and can be used in the following 
+manner:
+
+```{r 'transform to exponential'}
+library(nnadic)
+#install.packages("ismev")
+library(ismev)
+data("wavesurge")
+wavesurge_exp <- apply(wavesurge, 2, transform_to_exponential)
+
+```
+
+Once the data are on exponential margins we need to subset to include only 
+points that have $L_{\infty}$-norms greater than the 0.95-quantile 
+($\approx 2.995$). This is simple to accomplish with built-in `R` functions:
+
+```{r 'extract large points', fig.height=2.85, fig.width=7.5}
+q95 <- qexp(p = 0.95)
+large_points <- 
+  which(apply(wavesurge_exp, 1, q95 = q95,
+              function(x, q95 = q95){ifelse(max(x) > q95, 1, 0)}) == 1)
+wavesurge_subset <- wavesurge_exp[large_points, ]
+
+
+par(mfrow = c(1, 3))
+plot(wavesurge, main = "Unknown Margins")
+plot(wavesurge_exp, asp = 1, main = "Exponential Margins")
+plot(wavesurge_subset, asp = 1, main = "Large points")
+```
+
+Our classifier was trained on subsets of samples of size $n = 10000$. This means
+that we need $m = 500$ large points as input. Often real data do not have sample
+sizes of $10000$ so we have to resample (when $n < 10000$) or subsample 
+(when $n > 10000$) our large points to get 500. This is done with `nnadic`s 
+function `resample_to_500()`. This function sub/re-samples from the index vector
+that we created in the previous code chunk. This function allows the user to 
+generate several different sets of sub/re-samples in case the user wants to 
+assess the variability associated with the sub/re-sampling. If the dataset has
+fewer than $10000$ points, then the user can choose whether to re-sample the 
+large points (with replacement) 500 times or to ensure that all large points are
+included as many times as possible and randomly sample the remainder. This is 
+done with the `include_all.` argument.
+```{r, "get 500 points"}
+set.seed(1928234)
+indices_500 <- resample_to_500(large_points, 
+                               num_datasets. = 25, 
+                               include_all. = TRUE)
+# note that the first points are the same in each dataset
+print("First 5 points from first 10 resampled datasets:")
+indices_500[1:5, 1:10]
+# note that the last points in each dataset are randomly sampled
+print("Last 5 points from first 10 resampled datasets:")
+indices_500[496:500 ,1:10]
+
+wavesurge_500 <- lapply(1:25, function(x){wavesurge_exp[indices_500[,x], ]})
+
+```
+
+A copy of each of these points is added to the subsetted 
+data after reflection across the identity line. This data augmentation ensures
+coordinate invariance and is performed with the `make_symmetric()` function. 
+Finally, we need to transform the shape of our input object so that it is an 
+`array` with dimensions `c(number_datasets, 1000, 2)`. 
+
+
+```{r "make symmetric"}
+#install.packages("abind")
+wavesurge_ready <- lapply(wavesurge_500, make_symmetric)
+wavesurge_ready <- abind::abind(wavesurge_ready, along = 1)
+dim(wavesurge_ready)
+```
+We have combined all of the aforementioned simple steps into a single function
+which we call `get_nnadic_input()`. If the user believes the data are already 
+Exponential or prefers to transform the data with a different method they can 
+set `make_exponential = FALSE`. If the user wants to see how the largest
+$500$ points from their dataset with $n > 10000$, then they can set 
+`subsample = FALSE`. If the dataset is a time series (and thus the input is 
+a `vector`) then the user can choose to assess the dependence at different 
+lags with `comp_lag = 1` meaning the lag-1 dependence (`comp_lag` is ignored 
+if the input is a matrix). If the user does not want
+to see the built-in comments they can set `verbose = FALSE`. 
+
+```{r "get nnadic input", fig.height=2.85, fig.width=7.5}
+wavesurge_ready2 <- get_nnadic_input(wavesurge, 
+                                     make_exponential = TRUE,
+                                     subsample = TRUE, 
+                                     num_datasets = 25, 
+                                     include_all = TRUE,
+                                     comp_lag = 1,
+                                     verbose = TRUE)
+par(mfrow = c(1, 3))
+plot(wavesurge_exp, main = "Exponential Margins")
+plot(wavesurge_subset, asp = 1, main = "Large points")
+plot(wavesurge_ready2[1,,], asp = 1, main = "Symmetric input", 
+     xlab = "wave", ylab = "surge")
+```
+
+
+
+
+
+
+## Classification
+
+Classification is simple once the data are ready to be input into `nnadic`. One
+simply needs to call the `nnadic()` function and use the output from 
+`get_nnadic_input()` as the first argument. In this example, where we have 
+repetitions of a single dataset that we want classified, we set 
+`one_test = TRUE`. This toggle ought to be switched to `FALSE` when classifying 
+many datasets which occurs, for example, during simulation studies. Part of the 
+default output is a histogram of the classification probabilities which can be 
+toggled off by setting `make_hist = FALSE`. The user can toggle off the built-in 
+by setting `verbose = FALSE`. 
+
+```{r "nnadic"}
+wavesurge_out <- nnadic(wavesurge_ready2, one_test = , make_hist = , verbose = )
+```
+
+Here we can see that all 25 of the resampled datasets are classified as 
+asymptotically dependent with very little uncertainty (the largest 
+classification probability is less than 0.0001). 
+
+It is straightforward to perform this entire classification task with only a 
+few lines of code which we demonstrate by looking at the same `wavesurge` 
+dataset but this time we randomly sample all 500 input points 
+(`include_all = F`) and we generate 100 different resampled datasets 
+(`num_datasets = 100`).
+
+```{r "wavesurge exp2"}
+wavesurge_input_resample_all <- get_nnadic_input(wavesurge, 
+                                                 include_all = FALSE,
+                                                 num_datasets = 100)
+wavesurge_out_resample_all <- nnadic(wavesurge_input_resample_all)
+```
+
+It is clear, once again, that our classifier considers these data to be 
+asymptotically dependent. 
+
+
+
+
+
+
+
+## Other Examples
+
+### Testing `nnadic` on Gaussian and logistic data 
+
+Performing a simulation study is simple as long you can generate data from the 
+models that you are interested in. Here we test one common models from each 
+dependence regime. The first step is generating testing data. In this case we 
+know the generating distribution so we use that information to transform to 
+exponential margins. 
+
+```{r "generate Gaussian and logistic data"}
+library(mvtnorm) # for multivariate Gaussian
+library(evd)     # for logistic 
+set.seed(72143) #92841
+gaussian     <- logistic <- list()
+num_tests    <- 10
+sample_sizes <- sample(2000:18000, size = num_tests)
+dependence   <- runif(num_tests)
+
+for(i in 1:num_tests){
+  temp_gaussian <- rmvnorm(sample_sizes[i], 
+                           sigma = matrix(c(1, dependence[i], dependence[i], 1), 
+                                          ncol = 2))
+  temp_gaussian <- pnorm(temp_gaussian)
+  gaussian[[i]] <- qexp(temp_gaussian)
+  
+  temp_logistic <- rbvevd(sample_sizes[i],  
+                          dep = 1 - dependence[i], 
+                          model = "log", 
+                          mar1 = c(1, 1, 1))
+  temp_logistic <- pfrechet(temp_logistic)
+  logistic[[i]] <- qexp(temp_logistic)
+}
+
+gaussian <- lapply(gaussian, 
+                   get_nnadic_input, 
+                   make_exponential = FALSE, 
+                   num_datasets = 1, 
+                   verbose = FALSE)
+gaussian <- abind::abind(gaussian, along = 1)
+
+logistic <- lapply(logistic, 
+                   get_nnadic_input, 
+                   make_exponential = FALSE, 
+                   num_datasets = 1, 
+                   verbose = FALSE)
+logistic <- abind::abind(logistic, along = 1)
+
+gaussian_out <- nnadic(gaussian, one_test = FALSE, make_hist = FALSE)
+logistic_out <- nnadic(logistic, one_test = FALSE, make_hist = FALSE)
+```
+
+```{r "check which ones are wrong", fig.height=2.85, fig.width=7.5}
+mean(gaussian_out$probs)
+mean(gaussian_out$preds)
+(gaussian_wrong <- which(gaussian_out$preds != 1))
+dependence[gaussian_wrong]
+sample_sizes[gaussian_wrong]
+par(mfrow = c(1, 3))
+plot(gaussian[gaussian_wrong[1],,], asp = 1, xlab = "x1", ylab = "x2")
+plot(gaussian[gaussian_wrong[2],,], asp = 1, xlab = "x1", ylab = "x2")
+plot(gaussian[gaussian_wrong[3],,], asp = 1, xlab = "x1", ylab = "x2")
+
+mean(logistic_out$probs)
+mean(logistic_out$preds)
+(logistic_wrong <- which(logistic_out$preds != 0))
+
+
+
+```
+
+When investigating the results we notice that some of the Gaussian datasets 
+are incorrectly classified by `nnadic`. One of the incorrect datasets has 
+dependence parameter close to 1 and the other two dependence parameters are 
+close to zero. These datasets are nearly exactly dependent or perfectly 
+independent. 
+
+
+
+### Testing `nnadic` on the test data from the paer
+
+
+Here we mimic one of the tests in Wixson and Cooley (2025) using pre-generated
+Gaussian, logistic, inverted logistic, and asymmetric logistic data. Here we 
+show that one can make a histogram of output values from the `nnadic()` output. 
+```{r "experiment 2b", fig.height=3}
+library(nnadicTestData)
+
+# the data were saved after resampling but before enforcing symmetry
+test_data_four <- make_symmetric(test_data_four)
+
+results <- nnadic(test_data_four, one_test = FALSE, make_hist = FALSE)
+hist(results$preds, 
+     freq = FALSE, 
+     xlab = "Prediction", 
+     main = "Experiment 2b")
+```
+
+Finally, we highlight one of the results in the paper; namely that `nnadic` 
+correctly classifies nearly 97\% of the test datasets! 
+
+```{r "results from exp2b"}
+mean(results$preds == test_response_four)
+```
+
