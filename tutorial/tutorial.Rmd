@@ -100,9 +100,7 @@ Our feature network can, due to the desired separability, be represented as
       \sigma\big( \boldsymbol{h}^{(L_{\psi}-1)}_{\psi} 
       \boldsymbol{W}^{(L_{\psi})}_{\psi} + \boldsymbol{b}^{(L_{\psi})}_{\psi}\big).
 \end{align}
-Here $\boldsymbol{h}^{(l)}_{\psi}$ is the output of the $l^{\text{th}}$ 
-(hidden) layer of the $\boldsymbol{\psi}$-network, $\sigma$ is an activation 
-function, and $\boldsymbol{W}^{(l)}_{\psi}$ contains column-wise feature weights. 
+Here $\boldsymbol{h}^{(l)}_{\psi}$ is the output of the $l$th (hidden) layer of the $\boldsymbol{\psi}$-network, ${\boldsymbol \sigma}: \mathbb{R}^{q^{(l)}} \rightarrow \mathbb{R}^{q^{(l)}}$ is a componentwise activation function (defined below), and $\boldsymbol{W}^{(l)}_{\psi}$ contains column-wise feature weights.  
 Letting $q^{(l)}$ denote the feature dimension of the $l^{\text{th}}$ layer, 
 we note that each 
 $\boldsymbol{W}^{(l)} \in \mathbb{R}^{q^{(l-1)} \times q^{(l)}}$ and thus the 
@@ -121,11 +119,10 @@ The inference network can be represented as
       \sigma^{(L_{\phi})}\big( \boldsymbol{W}^{(L_{\phi})}_{\phi} 
       \boldsymbol{h}^{(L_{\phi}-1)}_{\phi}  + \boldsymbol{b}^{(L_{\phi})}_{\phi}\big).
 \end{align}
-All layers of $\hat{g}$ (except the final layer) are activated with the leaky 
-relu function [(Maas et al. 2013)](https://www.awnihannun.com/papers/relu_hybrid_icml2013_final.pdf).
-This function is defined piece-wise such that for input $z \geq 0$, 
-$\sigma(z) = z$ and for input $z < 0$, $\sigma(z) = az$ for some constant $a$ 
-close to zero (we use 0.01). 
+The activation function ${\boldsymbol \sigma}$ in equations (5)-(9) is defined componentwise so that for $q$-vector ${\bf y} = (y_1, \ldots, y_q)^\mathrm{\scriptstyle T}$, ${\boldsymbol \sigma} ({\bf y}) = \{\sigma_1 (y_1), \ldots, \sigma_q (y_q)\}^\mathrm{\scriptstyle T}$. Each $\sigma_j$, $j = 1, \ldots, q$ is a the leaky ReLU function (Maas et al. 2013) which is a piecewise function: $\sigma_j(y_j) = y_j$ if $y_j \geq 0$ and, for some constant $a$ close to zero (we use 0.01), $\sigma_j(y_j) = ay_j$ if $y_j < 0$. 
+This function protects against so-called dead ReLU neurons due to large negative weights/biases which output zeros with gradients equal to zero. 
+Zero gradients prevent gradient descent from updating the associated parameters and thus those neurons are never activated (Maas et al. 2013) which can cause issues when fitting NNs.
+The final layer (equation 10) is activated with a sigmoid (logistic) function $\sigma^{(L_{\phi})}$ which ensures output values are between zero and one.  
 
 ### How to get inputs
 
@@ -360,7 +357,7 @@ independent.
 
 
 
-### Testing `nnadic` on the test data from the paer
+### Testing `nnadic` on the test data from the paper
 
 
 Here we mimic one of the tests in Wixson and Cooley (2025) using pre-generated
