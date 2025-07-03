@@ -46,9 +46,6 @@ devtools::install_github("twixson/nnadic")
 
 Troubleshooting:
 
-- The `nnadic` package requires the `nnadicTestData` package which has
-  290Mb of data in it. Some users have found that they need to run
-  `options(timeout = 400)` prior to installation.  
 - The `nnadic` package requires a working `keras` installation. Some
   users have found that installing `keras` first is helpful. This
   includes ensuring that the python installation needed for the
@@ -61,12 +58,11 @@ install.packages("remotes", force = TRUE)
 remotes::install_github("rstudio/tensorflow", force = TRUE)
 remotes::install_github("rstudio/keras", force = TRUE)
 reticulate::install_miniconda()
-tensorflow::install_tensorflow()
 reticulate::install_python(version = '3.9')
+install.packages("keras")
 keras::install_keras()
-options(timeout = 400)
-install_github("twixson/nnadicTestData", force = TRUE)
-install_github("twixson/nnadic")
+tensorflow::install_tensorflow()
+remotes::install_github("twixson/nnadic")
 ```
 
 

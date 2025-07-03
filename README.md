@@ -4,7 +4,6 @@
 # nnadic
 
 <!-- badges: start -->
-
 <!-- badges: end -->
 
 The goal of nnadic (**N**eural **N**etwork for **A**symptotic
@@ -33,9 +32,6 @@ devtools::install_github("twixson/nnadic")
 
 Troubleshooting:
 
-- The `nnadic` package requires the `nnadicTestData` package which has
-  290Mb of data in it. Some users have found that they need to run
-  `options(timeout = 400)` prior to installation.  
 - The `nnadic` package requires a working `keras` installation. Some
   users have found that installing `keras` first is helpful. This
   includes ensuring that the python installation needed for the creation
@@ -48,12 +44,11 @@ install.packages("remotes", force = TRUE)
 remotes::install_github("rstudio/tensorflow", force = TRUE)
 remotes::install_github("rstudio/keras", force = TRUE)
 reticulate::install_miniconda()
-tensorflow::install_tensorflow()
 reticulate::install_python(version = '3.9')
+install.packages("keras")
 keras::install_keras()
-options(timeout = 400)
-install_github("twixson/nnadicTestData", force = TRUE)
-install_github("twixson/nnadic")
+tensorflow::install_tensorflow()
+remotes::install_github("twixson/nnadic")
 ```
 
 ## Example
@@ -70,7 +65,7 @@ library(mvtnorm)  # for generating AInd datasets (gaussian)
 test_data_four <- make_symmetric(test_data_four)
 
 results <- nnadic(test_data_four, one_test = FALSE)
-#> 125/125 - 1s - 503ms/epoch - 4ms/step
+#> 125/125 - 1s - 526ms/epoch - 4ms/step
 ```
 
 <img src="man/figures/README-example-1.png" width="100%" />
@@ -99,7 +94,7 @@ data_ready <- get_nnadic_input(data)
 #> [1] "...   datasets have 500 points."
 #> [1] "...each dataset was made symmetric and now has 1000 points."
 results <- nnadic(data_ready)
-#> 4/4 - 0s - 61ms/epoch - 15ms/step
+#> 4/4 - 0s - 48ms/epoch - 12ms/step
 ```
 
 <img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
