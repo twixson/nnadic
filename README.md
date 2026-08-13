@@ -20,6 +20,8 @@ correct dimension
 There are many customization options which allow the user to take
 advantage of advanced functionality.
 
+For details see [Wixson and Cooley (2025)](https://doi.org/10.1007/s10687-025-00520-9)
+
 ## Installation
 
 You can install the development version of nnadic from
