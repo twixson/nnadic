@@ -27,8 +27,8 @@ True Negative | False Negative
 False Positive | True Positive
 }
 \examples{
-library(nnadicTestData)
-test_data_sym <- make_symmetric(test_data_four)
+test_data_sym <- make_symmetric(test_data)
 predicted_probs <- nnadic(test_data_sym)$probs
-get_confusion_matrix(pred_prob = predicted_probs, truth = test_response_four)
+get_confusion_matrix(pred_prob = predicted_probs,
+                     truth = test_metadata$AD.0_AI.1)
 }

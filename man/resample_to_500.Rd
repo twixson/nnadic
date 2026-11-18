@@ -30,11 +30,7 @@ all of the top five percent be included in every dataset as many times as
 possible (\code{TRUE}) or should all 500 points be from resampling (\code{FALSE})?
 (defaults to \code{TRUE})}
 
-\item{comp_lag}{If your data is a univariate time series the function will
-automatically lag it so that it becomes bivariate. This allows you to
-change the lag. (defaults to \code{1})}
-
-\item{verbose}{Switch to \code{FALSE} to skip comments. (defaults to \code{TRUE})}
+\item{verbose.}{Switch to \code{FALSE} to skip comments. (defaults to \code{TRUE})}
 }
 \value{
 a \code{matrix} of dimension \code{c(500, num_datasets)} containing indices

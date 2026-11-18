@@ -9,7 +9,7 @@ transform_to_exponential(data, verbose. = TRUE)
 \arguments{
 \item{data}{a vector of observations}
 
-\item{verbose}{Switch to \code{FALSE} to skip comments. (defaults to \code{TRUE})}
+\item{verbose.}{Switch to \code{FALSE} to skip comments. (defaults to \code{TRUE})}
 }
 \value{
 a vector with unit exponential marginal distribution

@@ -137,7 +137,7 @@ transformation is used to transform those data to be marginally exponential.
 This function works on one margin at a time and can be used in the following 
 manner:
 
-```{r 'transform to exponential'}
+```{r 'transform_to_exponential'}
 library(nnadic)
 #install.packages("ismev")
 library(ismev)
@@ -150,7 +150,7 @@ Once the data are on exponential margins we need to subset to include only
 points that have $L_{\infty}$-norms greater than the 0.95-quantile 
 ($\approx 2.995$). This is simple to accomplish with built-in `R` functions:
 
-```{r 'extract large points', fig.height=2.85, fig.width=7.5}
+```{r 'extract_large_points', fig.height=2.85, fig.width=7.5}
 q95 <- qexp(p = 0.95)
 large_points <- 
   which(apply(wavesurge_exp, 1, q95 = q95,
@@ -176,7 +176,7 @@ fewer than $10000$ points, then the user can choose whether to re-sample the
 large points (with replacement) 500 times or to ensure that all large points are
 included as many times as possible and randomly sample the remainder. This is 
 done with the `include_all.` argument.
-```{r, "get 500 points"}
+```{r, "get_500_points"}
 set.seed(1928234)
 indices_500 <- resample_to_500(large_points, 
                                num_datasets. = 25, 
@@ -199,7 +199,7 @@ Finally, we need to transform the shape of our input object so that it is an
 `array` with dimensions `c(number_datasets, 1000, 2)`. 
 
 
-```{r "make symmetric"}
+```{r "make_symmetric"}
 #install.packages("abind")
 wavesurge_ready <- lapply(wavesurge_500, make_symmetric)
 wavesurge_ready <- abind::abind(wavesurge_ready, along = 1)
@@ -216,7 +216,7 @@ lags with `comp_lag = 1` meaning the lag-1 dependence (`comp_lag` is ignored
 if the input is a matrix). If the user does not want
 to see the built-in comments they can set `verbose = FALSE`. 
 
-```{r "get nnadic input", fig.height=2.85, fig.width=7.5}
+```{r "get_nnadic_input", fig.height=2.85, fig.width=7.5}
 wavesurge_ready2 <- get_nnadic_input(wavesurge, 
                                      make_exponential = TRUE,
                                      subsample = TRUE, 
@@ -262,7 +262,7 @@ dataset but this time we randomly sample all 500 input points
 (`include_all = F`) and we generate 100 different resampled datasets 
 (`num_datasets = 100`).
 
-```{r "wavesurge exp2"}
+```{r "wavesurge_exp2"}
 wavesurge_input_resample_all <- get_nnadic_input(wavesurge, 
                                                  include_all = FALSE,
                                                  num_datasets = 100)
@@ -288,7 +288,7 @@ dependence regime. The first step is generating testing data. In this case we
 know the generating distribution so we use that information to transform to 
 exponential margins. 
 
-```{r "generate Gaussian and logistic data"}
+```{r "generate_Gaussian_and_logistic_data"}
 library(mvtnorm) # for multivariate Gaussian
 library(evd)     # for logistic 
 set.seed(72143) #92841
@@ -330,7 +330,7 @@ gaussian_out <- nnadic(gaussian, one_test = FALSE, make_hist = FALSE)
 logistic_out <- nnadic(logistic, one_test = FALSE, make_hist = FALSE)
 ```
 
-```{r "check which ones are wrong", fig.height=2.85, fig.width=7.5}
+```{r "check_which_ones_are_wrong", fig.height=2.85, fig.width=7.5}
 mean(gaussian_out$probs)
 mean(gaussian_out$preds)
 (gaussian_wrong <- which(gaussian_out$preds != 1))
@@ -363,7 +363,7 @@ independent.
 Here we mimic one of the tests in Wixson and Cooley (2025) using pre-generated
 Gaussian, logistic, inverted logistic, and asymmetric logistic data. Here we 
 show that one can make a histogram of output values from the `nnadic()` output. 
-```{r "experiment 2b", fig.height=3}
+```{r "experiment_2b", fig.height=3}
 library(nnadicTestData)
 
 # the data were saved after resampling but before enforcing symmetry
@@ -379,7 +379,7 @@ hist(results$preds,
 Finally, we highlight one of the results in the paper; namely that `nnadic` 
 correctly classifies nearly 97\% of the test datasets! 
 
-```{r "results from exp2b"}
+```{r "results_from_exp2b"}
 mean(results$preds == test_response_four)
 ```
 

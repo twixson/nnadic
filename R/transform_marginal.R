@@ -143,7 +143,7 @@ get_nnadic_input <- function(data,
 #' Transform marginal distribution to unit exponential
 #'
 #' @param data a vector of observations
-#' @param verbose Switch to `FALSE` to skip comments. (defaults to `TRUE`)
+#' @param verbose. Switch to `FALSE` to skip comments. (defaults to `TRUE`)
 #'
 #' @return a vector with unit exponential marginal distribution
 #' @export
@@ -194,10 +194,7 @@ transform_to_exponential <- function(data, verbose. = TRUE) {
 #'   all of the top five percent be included in every dataset as many times as
 #'   possible (`TRUE`) or should all 500 points be from resampling (`FALSE`)?
 #'   (defaults to `TRUE`)
-#' @param comp_lag If your data is a univariate time series the function will
-#'   automatically lag it so that it becomes bivariate. This allows you to
-#'   change the lag. (defaults to `1`)
-#' @param verbose Switch to `FALSE` to skip comments. (defaults to `TRUE`)
+#' @param verbose. Switch to `FALSE` to skip comments. (defaults to `TRUE`)
 #'
 #' @return a `matrix` of dimension `c(500, num_datasets)` containing indices
 #'   of large points after sub/re-sampling

@@ -16,10 +16,10 @@
 #' @export
 #'
 #' @examples
-#' library(nnadicTestData)
-#' test_data_sym <- make_symmetric(test_data_four)
+#' test_data_sym <- make_symmetric(test_data)
 #' predicted_probs <- nnadic(test_data_sym)$probs
-#' get_confusion_matrix(pred_prob = predicted_probs, truth = test_response_four)
+#' get_confusion_matrix(pred_prob = predicted_probs,
+#'                      truth = test_metadata$AD.0_AI.1)
 get_confusion_matrix <- function(pred_prob,
                                  truth.,
                                  t_hold = 0.5) {
@@ -40,11 +40,10 @@ get_confusion_matrix <- function(pred_prob,
 #' @export
 #'
 #' @examples
-#' library(nnadicTestData)
-#' test_data_sym <- make_symmetric(test_data_four)
+#' test_data_sym <- make_symmetric(test_data)
 #' predicted_probs <- nnadic(test_data_sym)$probs
 #' confusion_matrix <- get_confusion_matrix(pred_prob = predicted_probs,
-#'                                          truth = test_response_four)
+#'                                          truth = test_metadata$AD.0_AI.1)
 #' get_tpr_fpr(conf_mat = confusion_matrix)
 get_tpr_fpr <- function(conf_mat) {
   tpr <- conf_mat[2, 2] / (conf_mat[2, 2] + conf_mat[1, 2])
@@ -67,11 +66,10 @@ get_tpr_fpr <- function(conf_mat) {
 #' @export
 #'
 #' @examples
-#' library(nnadicTestData)
-#' test_data_sym <- make_symmetric(test_data_four)
+#' test_data_sym <- make_symmetric(test_data)
 #' predicted_probs <- nnadic(test_data_sym)$probs
 #' roc <- get_roc(predicted_probabilities = predicted_probs,
-#'                truth = test_response_four,
+#'                truth = test_metadata$AD.0_AI.1,
 #'                make_plot = TRUE,
 #'                add_auc = TRUE)
 get_roc <- function(predicted_probabilities, truth,
@@ -107,11 +105,10 @@ get_roc <- function(predicted_probabilities, truth,
 #' @export
 #'
 #' @examples
-#' library(nnadicTestData)
-#' test_data_sym <- make_symmetric(test_data_four)
+#' test_data_sym <- make_symmetric(test_data)
 #' predicted_probs <- nnadic(test_data_sym)$probs
 #' roc <- get_roc(predicted_probabilities = predicted_probs,
-#'                truth = test_response_four,
+#'                truth = test_metadata$AD.0_AI.1,
 #'                make_plot = TRUE,
 #'                add_auc = TRUE)
 #'get_auc(roc)
@@ -135,11 +132,10 @@ get_auc <- function(roc.) {
 #' @export
 #'
 #' @examples
-#' library(nnadicTestData)
-#' test_data_sym <- make_symmetric(test_data_four)
+#' test_data_sym <- make_symmetric(test_data)
 #' predicted_probs <- nnadic(test_data_sym)$probs
 #' get_brier(predicted_probabilities = predicted_probs,
-#'                truth = test_response_four)
+#'           truth = test_metadata$AD.0_AI.1)
 get_brier <- function(predicted_probabilities, truth) {
   N <- length(truth)
   brier_sum <- sum((predicted_probabilities - truth)^2)
