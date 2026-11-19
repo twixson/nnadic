@@ -115,3 +115,27 @@ results$mean
 #> [1] 1
 # should be 1
 ```
+
+## Feature maps
+
+Our neural network uses 32 summary features of each dataset to classify
+the dataset. We can extract these feature maps to get an idea of how the
+network is performing classification. Below we will create two feature
+maps from the first dataset in `test_data`.
+
+``` r
+data <- make_symmetric(test_data[1,,])
+out <- nnadic(data, return_features = TRUE, progress_bar = FALSE)
+
+plot_feature(data, nnadic_object = out, feature_number = 10)
+#> [1] "Using the first dataset in `data`."
+```
+
+<img src="man/figures/README-feature_maps-1.png" alt="" width="100%" />
+
+``` r
+plot_feature(data, nnadic_object = out, feature_number = 15)
+#> [1] "Using the first dataset in `data`."
+```
+
+<img src="man/figures/README-feature_maps-2.png" alt="" width="100%" />

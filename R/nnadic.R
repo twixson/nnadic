@@ -131,7 +131,9 @@ plot_feature <- function(data, nnadic_object, feature_number){
     data <- data[1,,]
     nnadic_object$probs <- nnadic_object$probs[1]
     nnadic_object$preds <- nnadic_object$preds[1]
-    nnadic_object$features <- nnadic_object$features[1,,]
+    if(length(dim(nnadic_object$features)) == 3){
+      nnadic_object$features <- nnadic_object$features[1,,]
+    }
     print("Using the first dataset in `data`.")
   }
   data.frame(x1 = data[,1],
@@ -174,6 +176,10 @@ nn_layer <- function(x, w, b, activation = "relu"){
   x_dim <- dim(x)
   w_dim <- dim(w)
 
+  if(is.null(x_dim) == TRUE){
+    x <- matrix(x, nrow = 1)
+    x_dim <- dim(x)
+  }
   if(length(x_dim) == 2){
     temp <- x %*% w
     temp <- sweep(temp, 2, b, "+")
