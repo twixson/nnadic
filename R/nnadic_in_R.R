@@ -29,20 +29,17 @@ all_weights <- readRDS("./inst/pretrained_models/published_weights.rds")
 #' @examples
 #' nnadic(get_nnadic_input(matrix(rnorm(20000), ncol = 2)))
 nnadic <- function(data, prob_AInd_only = FALSE, verbose = FALSE){
-  conv1    <- nn_layer(data, w = all_weights$w1[1,,], b = all_weights$b1)
-  conv2    <- nn_layer(conv1, w = all_weights$w2[1,,], b = all_weights$b2)
-  conv3    <- nn_layer(conv2, w = all_weights$w3[1,,], b = all_weights$b3)
-  avg_pool <- apply(conv3, which(dim(conv3) != 1000), mean)
-  if(is.null(dim(avg_pool))){
-    avg_pool <- matrix(avg_pool, nrow = 1)
-    }
-  dense4   <- nn_layer(avg_pool, w = all_weights$w4, b = all_weights$b4)
-  dense5   <- nn_layer(dense4, w = all_weights$w5, b = all_weights$b5)
-  dense6   <- nn_layer(dense5, w = all_weights$w6, b = all_weights$b6)
-  dense7   <- nn_layer(dense6, w = all_weights$w7, b = all_weights$b7,
+  temp     <- nn_layer(data, w = all_weights$w1[1,,], b = all_weights$b1)
+  temp     <- nn_layer(temp, w = all_weights$w2[1,,], b = all_weights$b2)
+  features <- nn_layer(temp, w = all_weights$w3[1,,], b = all_weights$b3)
+  temp     <- apply(features, which(dim(features) != 1000), mean)
+  temp     <- nn_layer(temp, w = all_weights$w4, b = all_weights$b4)
+  temp     <- nn_layer(temp, w = all_weights$w5, b = all_weights$b5)
+  temp     <- nn_layer(temp, w = all_weights$w6, b = all_weights$b6)
+  temp     <- nn_layer(temp, w = all_weights$w7, b = all_weights$b7,
                        activation = "sigmoid")
-  probs <- dense7
-  prediction <- ifelse(1 - probs > 0.5, "AD", "AI")
+  probs <- temp
+  prediction <- ifelse(probs < 0.5, "AD", "AI")
 
   if(verbose == TRUE){
     print("Probabilities and predictions for each dataset are being returned")
@@ -52,7 +49,7 @@ nnadic <- function(data, prob_AInd_only = FALSE, verbose = FALSE){
     print(paste0("The prediction is: ", prediction))
   }
   if(prob_AInd_only == FALSE){
-    return(list(probs = probs, preds = prediction, features = conv3))
+    return(list(probs = probs, preds = prediction, features = features))
   } else {
     return(probs)
   }
@@ -121,31 +118,30 @@ plot_feature <- function(data, nnadic_object, feature_number){
 #'          b = rnorm(32),
 #'          activation = "relu")
 nn_layer <- function(x, w, b, activation = "relu"){
-  if(length(dim(x)) == 2){
-    temp <- x %*% w + matrix(b, nrow = dim(x)[1], ncol = dim(w)[2], byrow = TRUE)
-  } else if(length(dim(x)) == 3){
-    if(dim(x)[1] == 1) {
-      temp <- x[1,,] %*% w +
-        matrix(b, nrow = dim(x)[2], ncol = dim(w)[2], byrow = TRUE)
+  x_dim <- dim(x)
+  w_dim <- dim(w)
+
+  if(length(x_dim) == 2){
+    temp <- x %*% w
+    temp <- sweep(temp, 2, b, "+")
+  } else if(length(x_dim) == 3){
+    if(x_dim[1] == 1){
+      temp <- x[1,,] %*% w
+      temp <- sweep(temp, 2, b, "+")
     } else {
-      temp <- array(dim = c(dim(x)[1], dim(x)[2], dim(w)[2]))
-      for(i in 1:dim(x)[1]){
-        temp[i,,] <- x[i,,] %*% w +
-          matrix(b, nrow = dim(x)[2], ncol = dim(w)[2], byrow = TRUE)
-      }
+      temp <- matrix(x, nrow = x_dim[1] * x_dim[2]) %*% w
+      temp <- sweep(temp, 2, b, "+")
+      dim(temp) <- c(x_dim[1], x_dim[2], w_dim[2])
     }
   } else {
     stop("ERROR: `x` has wrong dimensions. \n \t Must be `matrix` or `array` with 3 dimensions.")
   }
-  if(activation == "relu"){
-    return(leaky_relu(temp))
-  } else if(activation == "sigmoid"){
-    return(sigmoid(temp))
-  } else if(activation == "identity"){
-    return(temp)
-  } else {
-    stop("ERROR: activation function unknown: \n \t must be `relu`, `sigmoid`, or `identity`")
-  }
+  switch(activation,
+         relu = pmax(temp, 0.3*temp),
+         sigmoid = 1 / (1 + exp(-temp)),
+         identity = temp,
+         stop("ERROR: activation function unknown: \n \t must be `relu`, `sigmoid`, or `identity`")
+  )
 }
 
 #' The leaky rectified linear unit (leaky relu) activation function

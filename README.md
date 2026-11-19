@@ -4,6 +4,7 @@
 # nnadic
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
 The goal of nnadic (**N**eural **N**etwork for **A**symptotic
@@ -20,37 +21,14 @@ correct dimension
 There are many customization options which allow the user to take
 advantage of advanced functionality.
 
-For details see [Wixson and Cooley (2025)](https://doi.org/10.1007/s10687-025-00520-9)
-
 ## Installation
 
 You can install the development version of nnadic from
 [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("twixson/nnadic")
-```
-
-Troubleshooting:
-
-- The `nnadic` package requires a working `keras` installation. Some
-  users have found that installing `keras` first is helpful. This
-  includes ensuring that the python installation needed for the creation
-  of the virtual environment is suitable.
-
-Suggested install code:
-
-``` r
-install.packages("remotes", force = TRUE)
-remotes::install_github("rstudio/tensorflow", force = TRUE)
-remotes::install_github("rstudio/keras", force = TRUE)
-reticulate::install_miniconda()
-reticulate::install_python(version = '3.9')
-install.packages("keras")
-keras::install_keras()
-tensorflow::install_tensorflow()
-remotes::install_github("twixson/nnadic")
+# install.packages("pak")
+pak::pak("twixson/nnadic")
 ```
 
 ## Example
@@ -66,16 +44,16 @@ library(mvtnorm)  # for generating AInd datasets (gaussian)
 
 test_data_four <- make_symmetric(test_data_four)
 
-results <- nnadic(test_data_four, one_test = FALSE)
-#> 125/125 - 1s - 526ms/epoch - 4ms/step
+results <- nnadic(test_data_four, prob_AInd_only = TRUE)
+hist(results)
 ```
 
-<img src="man/figures/README-example-1.png" width="100%" />
+<img src="man/figures/README-example-1.png" alt="" width="100%" />
 
-    #> [1] "Probabilities and predictions for each dataset are being returned"
-    #> [1] "Each probability is the probability of AI which is coded as '1'"
-    mean(results$preds == test_response_four)
-    #> [1] 0.96925
+``` r
+mean((results > 0.5) == test_response_four)
+#> [1] 0.96925
+```
 
 ``` r
 set.seed(2938)
@@ -95,20 +73,17 @@ data_ready <- get_nnadic_input(data)
 #> [1] "...the rest of the points were subsampled so that all 100"
 #> [1] "...   datasets have 500 points."
 #> [1] "...each dataset was made symmetric and now has 1000 points."
-results <- nnadic(data_ready)
-#> 4/4 - 0s - 48ms/epoch - 12ms/step
+results <- nnadic(data_ready, prob_AInd_only = TRUE)
+hist(results)
 ```
 
-<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-2-1.png" alt="" width="100%" />
 
-    #> [1] "Probabilities and predictions for each dataset are being returned"
-    #> [1] "Each probability is the probability of AI which is coded as '1'"
-    #> [1] "##################"
-    #> [1] "The mean of the predictions is: 0"
-    #> [1] "This is `nnadic`'s probability that these data are AI"
-    results$mean
-    #> [1] 0
-    # should be 0
+``` r
+mean(results > 0.5)
+#> [1] 0
+# should be 0
+```
 
 ``` r
 # Lets generate a new Adep dataset
@@ -125,14 +100,14 @@ data_ready <- get_nnadic_input(data, subsample = TRUE)
 #> [1] "...points above the 0.95 quantile were subsampled 100 times"
 #> [1] "...   so that each dataset has exactly 500 points."
 #> [1] "...each dataset was made symmetric and now has 1000 points."
-results <- nnadic(data_ready, make_hist = FALSE)
-#> 4/4 - 0s - 20ms/epoch - 5ms/step
-#> [1] "Probabilities and predictions for each dataset are being returned"
-#> [1] "Each probability is the probability of AI which is coded as '1'"
-#> [1] "##################"
-#> [1] "The mean of the predictions is: 1"
-#> [1] "This is `nnadic`'s probability that these data are AI"
-results$mean
+results <- nnadic(data_ready, prob_AInd_only = TRUE)
+hist(results)
+```
+
+<img src="man/figures/README-unnamed-chunk-3-1.png" alt="" width="100%" />
+
+``` r
+mean(results > 0.5)
 #> [1] 1
 # should be 1
 ```

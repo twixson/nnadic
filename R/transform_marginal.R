@@ -293,7 +293,21 @@ resample_to_500 <- function(indices,
 #' largest_500 <- matrix(rnorm(1000), nrow = 500)
 #' symmetric_nnadic_input <- make_symmetric(largest_500)
 make_symmetric <- function(data) {
-  if(length(dim(data)) == 3){
+  if(1000 %in% dim(data)){
+    if(length(dim(data)) == 3 & dim(data)[2] == 1000){
+      if(all.equal(data[,1:500,], data[,501:1000,c(2,1)]) == TRUE){
+        print("~~~ Already symmetric! ~~~")
+        temp_array <- data
+      }
+    } else if(length(dim(data)) == 2 & dim(data)[1] == 1000){
+      if(all.equal(data[1:500,], data[501:1000,c(2,1)]) == TRUE){
+        print("~~~ Already symmetric! ~~~")
+        temp_array <- array(data, dim = c(1, 1000, 2))
+      }
+    } else {
+      stop("ERROR: dataset has 1000 points \n \t need to subsample with `resample_to_500()`")
+    }
+  } else if(length(dim(data)) == 3){
     temp_array               <- array(NA, dim = c(dim(data)[1], 1000, 2))
     temp_array[, 1:500, ]    <- data
     temp_array[, 501:1000, ] <- data[,, c(2,1)]

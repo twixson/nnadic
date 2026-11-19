@@ -3,7 +3,3 @@
 ^LICENSE\.md$
 ^README\.Rmd$
 ^\.git$
-^\.git/
-^\.gitignore$
-^\.gitattributes$
-^\./\.git$

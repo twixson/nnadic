@@ -40,30 +40,10 @@ You can install the development version of nnadic from
 [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("twixson/nnadic")
+# install.packages("pak")
+pak::pak("twixson/nnadic")
 ```
 
-Troubleshooting:
-
-- The `nnadic` package requires a working `keras` installation. Some
-  users have found that installing `keras` first is helpful. This
-  includes ensuring that the python installation needed for the
-  creation of the virtual environment is suitable. 
-
-Suggested install code:
-
-``` r
-install.packages("remotes", force = TRUE)
-remotes::install_github("rstudio/tensorflow", force = TRUE)
-remotes::install_github("rstudio/keras", force = TRUE)
-reticulate::install_miniconda()
-reticulate::install_python(version = '3.9')
-install.packages("keras")
-keras::install_keras()
-tensorflow::install_tensorflow()
-remotes::install_github("twixson/nnadic")
-```
 
 
 ## Example
@@ -78,8 +58,9 @@ library(mvtnorm)  # for generating AInd datasets (gaussian)
 
 test_data_four <- make_symmetric(test_data_four)
 
-results <- nnadic(test_data_four, one_test = FALSE)
-mean(results$preds == test_response_four)
+results <- nnadic(test_data_four, prob_AInd_only = TRUE)
+hist(results)
+mean((results > 0.5) == test_response_four)
 ```
 
 
@@ -89,8 +70,9 @@ set.seed(2938)
 data <- rbvevd(8734, dep = 0.5, model = "log")
 # and test it
 data_ready <- get_nnadic_input(data)
-results <- nnadic(data_ready)
-results$mean
+results <- nnadic(data_ready, prob_AInd_only = TRUE)
+hist(results)
+mean(results > 0.5)
 # should be 0
 ```
 
@@ -99,8 +81,9 @@ results$mean
 data <- rmvnorm(19886, c(0,0), matrix(c(1, 0.5, 0.5, 1), nrow = 2))
 # and test it
 data_ready <- get_nnadic_input(data, subsample = TRUE)
-results <- nnadic(data_ready, make_hist = FALSE)
-results$mean
+results <- nnadic(data_ready, prob_AInd_only = TRUE)
+hist(results)
+mean(results > 0.5)
 # should be 1
 ```
 
