@@ -24,6 +24,6 @@ Create a feature plot for your dataset
 }
 \examples{
 data <- get_nnadic_input(matrix(rnorm(20000), ncol = 2))
-prediction <- nnadic(data, prob_AInd_only = FALSE)
+prediction <- nnadic(data, features = TRUE)
 plot_feature(data, nnadic_object = prediction, feature_number = 1)
 }

@@ -4,25 +4,54 @@
 \alias{nnadic}
 \title{Neural Network for Asymptotic Dependence/Independence Classification}
 \usage{
-nnadic(data, prob_AInd_only = FALSE, verbose = FALSE)
+nnadic(
+  data,
+  return_preds = TRUE,
+  return_features = FALSE,
+  one_test = TRUE,
+  make_hist = FALSE,
+  verbose = FALSE,
+  progress_bar = TRUE
+)
 }
 \arguments{
-\item{data}{an array of dimension \eqn{n}x\eqn{d}x\eqn{2}.
-Currently only supports \eqn{d=1000}. Use \code{get_nnadic_input()}
-to prepare your data.}
+\item{data}{an array of dimension \eqn{n}x\eqn{d}x\eqn{2}. Currently only
+supports \eqn{d=1000}. Use \code{get_nnadic_input()} to prepare your data.}
 
-\item{prob_AInd_only}{Switch to \code{TRUE} to only return probability AInd.
-Leave as \code{FALSE} to also return the classification ("AD" or "AI) and the
-feature matrix. (defaults to \code{FALSE})}
+\item{return_preds}{change to \code{FALSE} if you do not want the predictions to
+be returned in the output (defaults to \code{TRUE}).}
 
-\item{verbose}{Switch to \code{TRUE} to display comments. (defaults to \code{FALSE})}
+\item{return_features}{change to \code{TRUE} to return the features. The features
+are the outputs of the convolutional layers. Aggregating the features gives
+us the so-called summary statistics. Feature maps can be created with
+\code{plot_features}. These help us to assess what the summary statistics are
+calculating and whether the network is performing prediction in a way that
+aligns with our statistical understanding of the problem.  (defaults to
+\code{FALSE})}
+
+\item{one_test}{change to \code{FALSE} if there are multiple datasets in your test
+This can be used to test \code{nnadic} on simulated datasets where the truth is
+known or on multiple unknown datasets at the same time. When \code{TRUE} \code{nnadic}
+will also return the mean of the predictions (i.e., the proportion of
+predictions that are "AInd").}
+
+\item{make_hist}{change to \code{TRUE} to make a histogram of the results
+(defaults to \code{FALSE})}
+
+\item{verbose}{change to \code{TRUE} to display comments. (defaults to \code{FALSE})}
+
+\item{progress_bar}{change to \code{FALSE} to turn off the progress bar. (defaults
+to \code{TRUE})}
 }
 \value{
-a \code{list} with two or three items:
+a \code{list} and a \code{plot} if \code{make_hist} is \code{TRUE}. Elements in the list
+are controlled by function arguments and can include:
 \enumerate{
 \item probs - the probability of being AI
 \item preds - the predictions ("AD" or "AI")
 \item features - \eqn{1000}x\eqn{32} matrix of \eqn{32} features.
+\item mean - the mean of the predictions (i.e., the proportion of predictions
+that are "AInd").
 }
 }
 \description{

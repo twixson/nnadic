@@ -58,9 +58,8 @@ library(mvtnorm)  # for generating AInd datasets (gaussian)
 
 test_data_four <- make_symmetric(test_data_four)
 
-results <- nnadic(test_data_four, prob_AInd_only = TRUE)
-hist(results)
-mean((results > 0.5) == test_response_four)
+results <- nnadic(test_data_four, make_hist = TRUE)
+mean((results$probs > 0.5) == test_response_four)
 ```
 
 
@@ -70,9 +69,9 @@ set.seed(2938)
 data <- rbvevd(8734, dep = 0.5, model = "log")
 # and test it
 data_ready <- get_nnadic_input(data)
-results <- nnadic(data_ready, prob_AInd_only = TRUE)
-hist(results)
-mean(results > 0.5)
+results <- nnadic(data_ready, make_hist = TRUE, one_test = TRUE)
+mean(results$preds == "AI")
+results$mean
 # should be 0
 ```
 
@@ -81,9 +80,9 @@ mean(results > 0.5)
 data <- rmvnorm(19886, c(0,0), matrix(c(1, 0.5, 0.5, 1), nrow = 2))
 # and test it
 data_ready <- get_nnadic_input(data, subsample = TRUE)
-results <- nnadic(data_ready, prob_AInd_only = TRUE)
-hist(results)
-mean(results > 0.5)
+results <- nnadic(data_ready, make_hist = TRUE, one_test = TRUE)
+mean(results$preds > "AI")
+results$mean
 # should be 1
 ```
 
