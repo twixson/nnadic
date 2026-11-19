@@ -124,7 +124,7 @@ nnadic <- function(data, return_preds = TRUE, return_features = FALSE,
 #'
 #' @examples
 #' data <- get_nnadic_input(matrix(rnorm(20000), ncol = 2))
-#' prediction <- nnadic(data, features = TRUE)
+#' prediction <- nnadic(data, return_features = TRUE)
 #' plot_feature(data, nnadic_object = prediction, feature_number = 1)
 plot_feature <- function(data, nnadic_object, feature_number){
   if(length(dim(data)) == 3){
